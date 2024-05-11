@@ -1,6 +1,5 @@
 from rich.prompt import Prompt
 from rich.console import Console
-import manager
 
 class Task:
     def __init__(self, task_id, title, description, assigned_to):
@@ -15,6 +14,7 @@ class Project:
         self.title = title
         self.creator = creator
         self.tasks = []
+        self.members = []
 
     def create_task(self, task_id, title, description):
         task = Task(task_id, title, description, None)
@@ -24,6 +24,11 @@ class Project:
         for task in self.tasks:
             if task.task_id == task_id:
                 task.assigned_to = assigned_to
+                # Assuming 'assigned_to' is a username, find or create the User object
+                member = next((m for m in self.members if m.username == assigned_to), None)
+                if not member:
+                    member = User(assigned_to, None)  # Replace None with actual password if available
+                    self.members.append(member)
                 return True
         return False
 
@@ -39,6 +44,15 @@ class Project:
                 return True
         return False
 
+    def add_member(self, username):
+        # Create a new User object and add to members list
+        member = User(username, None)  # Replace None with actual password if available
+        self.members.append(member)
+
+    def view_members(self):
+        for member in self.members:
+            print(f"\nMembers:\n{member.username}\n")
+
 class User:
     def __init__(self, username, password):
         self.username = username
@@ -51,27 +65,21 @@ class User:
 
 def login():
     console = Console()
-
-    # Prompt user for email, username, and password
     email = Prompt.ask("Enter your email:")
     username = Prompt.ask("Enter your username:")
     password = Prompt.ask("Enter your password:", password=True)
-    # Dummy login logic
-    if email[-4::1] == ".com" and bool(email.find('@'))==True  and username[0].isupper() and len(password) >= 5:
+    if email.endswith(".com") and '@' in email and username[0].isupper() and len(password) >= 5:
         console.print("[bold green]Login successful![/bold green]")
-        return User(username, password)  # Return the user object upon successful login
+        return User(username, password)
     else:
         console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
-        return None  # Return None if login fails
+        return None
 
 def display_user_page(user):
     console = Console()
-
     console.print(f"Welcome, {user.username}!")
-
     while True:
         choice = Prompt.ask("\nSelect an option:\n1. Create Project\n2. View Projects\n3. View Other User\n4. Exit\n")
-        
         if choice == "1":
             project_id = Prompt.ask("Enter project ID:")
             title = Prompt.ask("Enter project title:")
@@ -84,10 +92,18 @@ def display_user_page(user):
                 console.print("[bold blue]Your Projects:[/bold blue]")
                 for project in user.projects:
                     console.print(f"Project ID: {project.project_id}, Title: {project.title}, Creator: {project.creator}")
+                    # Added logic to view and add members
+                for project in user.projects:
+                    ch = Prompt.ask("\n1.View Members\n2.Add Member")
+                    if ch == '1':
+                        project.view_members()
+                    elif ch == '2':
+                        username_to_add = Prompt.ask("Enter username to add:")
+                        project.add_member(username_to_add)
+                        console.print("[bold green]Member added successfully![/bold green]")
         elif choice == "3":
-            username = Prompt.ask("Enter username of the user you want to view:")
-            # Placeholder logic to view other user's profile
-            console.print(f"[bold blue]Viewing profile of user: {username}[/bold blue]")
+            username_to_view = Prompt.ask("Enter username of the user you want to view:")
+            console.print(f"[bold blue]Viewing profile of user: {username_to_view}[/bold blue]")
         elif choice == "4":
             console.print("[bold]Goodbye![/bold]")
             break
@@ -95,7 +111,7 @@ def display_user_page(user):
             console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
 def main():
-    user = login()  # Call login function to get the logged-in user object
+    user = login()
     if user:
         display_user_page(user)
 
