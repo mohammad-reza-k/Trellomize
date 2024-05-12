@@ -63,13 +63,19 @@ class User:
         project = Project(project_id, title, self.username)
         self.projects.append(project)
 
-def login():
+def create_acc():
     console = Console()
     email = Prompt.ask("Enter your email:")
     username = Prompt.ask("Enter your username:")
     password = Prompt.ask("Enter your password:", password=True)
     if email.endswith(".com") and '@' in email and username[0].isupper() and len(password) >= 5:
         console.print("[bold green]Login successful![/bold green]")
+        with open("manba.txt","a") as f:
+            f.write(email ) 
+            f.write("   ")
+            f.write(username)
+            f.write("\n")
+            f.close()
         return User(username, password)
     else:
         console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
@@ -110,10 +116,45 @@ def display_user_page(user):
         else:
             console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
+    
+
+
+
+
+
+
 def main():
-    user = login()
-    if user:
-        display_user_page(user)
+    console = Console()
+    while True:
+        choice = Prompt.ask("\nSelect an option:\n1. Create Account\n2. Login\n3. Exit\n")
+        if choice == "1":
+            user = create_acc()
+            if user:
+                display_user_page(user)
+        elif choice == "2":
+            email = Prompt.ask("Enter your email:")
+            username = Prompt.ask("Enter your username:")
+            password = Prompt.ask("Enter your password:", password=True)
+            if email.endswith(".com") and '@' in email and username[0].isupper() and len(password) >= 5:
+                console.print("[bold green]Account created successfully![/bold green]")
+                with open("manba.txt","a") as f:
+                    f.write(email ) 
+                    f.write("   ")
+                    f.write(username)
+                    f.write("   ")
+                    f.write(password)
+                    f.write("\n")
+                    
+                    f.close()
+                user = User(username, password)
+                display_user_page(user)
+            else:
+                console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
+        elif choice == "3":
+            console.print("[bold]Goodbye![/bold]")
+            break
+        else:
+            console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
 if __name__ == "__main__":
     main()
