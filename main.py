@@ -116,7 +116,19 @@ def display_user_page(user):
         else:
             console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
+
     
+def login():
+    esm = input("enter your email or username")
+
+    with open ("manba.txt" , "r") as file:
+        content = file.read()
+        if esm in content:
+            print("meow meow")
+    
+
+
+
 
 
 
@@ -131,25 +143,26 @@ def main():
             user = create_acc()
             if user:
                 display_user_page(user)
-        elif choice == "2":
-            email = Prompt.ask("Enter your email:")
-            username = Prompt.ask("Enter your username:")
-            password = Prompt.ask("Enter your password:", password=True)
-            if email.endswith(".com") and '@' in email and username[0].isupper() and len(password) >= 5:
-                console.print("[bold green]Account created successfully![/bold green]")
-                with open("manba.txt","a") as f:
-                    f.write(email ) 
-                    f.write("   ")
-                    f.write(username)
-                    f.write("   ")
-                    f.write(password)
-                    f.write("\n")
-                    
-                    f.close()
-                user = User(username, password)
-                display_user_page(user)
-            else:
-                console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
+        #elif choice == "2":
+        #    email = Prompt.ask("Enter your email:")
+        #    username = Prompt.ask("Enter your username:")
+        #    password = Prompt.ask("Enter your password:", password=True)
+        #    if email.endswith(".com") and '@' in email and username[0].isupper() and len(password) >= 5:
+        #        console.print("[bold green]Account created successfully![/bold green]")
+        #        with open("manba.txt","a") as f:
+        #            f.write(email ) 
+        #            f.write("   ")
+        #            f.write(username)
+        #            f.write("   ")
+        #            f.write(password)
+        #            f.write("\n")
+        #            
+        #            f.close()
+        #        user = User(username, password)
+        #        display_user_page(user)
+        elif choice == "2" :
+            login()
+            
         elif choice == "3":
             console.print("[bold]Goodbye![/bold]")
             break
