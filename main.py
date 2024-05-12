@@ -1,6 +1,7 @@
 from rich.prompt import Prompt
 from rich.console import Console
 
+
 class Task:
     def __init__(self, task_id, title, description, assigned_to):
         self.task_id = task_id
@@ -66,6 +67,10 @@ class User:
 def create_acc():
     console = Console()
     email = Prompt.ask("Enter your email:")
+    if login(email)==1:
+        print("You Already Have An Account")
+        
+        return
     username = Prompt.ask("Enter your username:")
     password = Prompt.ask("Enter your password:", password=True)
     if email.endswith(".com") and '@' in email and username[0].isupper() and len(password) >= 5:
@@ -118,23 +123,32 @@ def display_user_page(user):
 
 
     
-def login():
-    esm = input("enter your email or username")
-
+def login(esm):
+    a = 0
     with open ("manba.txt" , "r") as file:
         content = file.read()
         if esm in content:
-            print("meow meow")
+            a = 1
+    return a
+            
+def check_credentials(input_email, input_username, input_password, file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    for i in range(0, len(lines), 3):  # Assuming the file structure is email, username, password
+        try:
+            email = lines[i].strip()
+            username = lines[i+1].strip()
+            password = lines[i+2].strip()
+        except IndexError:
+            
+            return False
+
+        if email == input_email and username == input_username and password == input_password:
+            return True
+
+    return False 
     
-
-
-
-
-
-
-
-
-
 def main():
     console = Console()
     while True:
@@ -161,7 +175,10 @@ def main():
         #        user = User(username, password)
         #        display_user_page(user)
         elif choice == "2" :
-            login()
+            nam= input("enter your email or username\n")
+            user(nam,None)
+            if login(nam)==1:
+                
             
         elif choice == "3":
             console.print("[bold]Goodbye![/bold]")
