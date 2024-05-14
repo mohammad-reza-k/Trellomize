@@ -1,5 +1,8 @@
 from rich.prompt import Prompt
 from rich.console import Console
+import hashlib
+import os
+import uuid
 
 class Task:
     def __init__(self, task_id, title, description, assigned_to):
@@ -77,11 +80,11 @@ def create_acc():
     if email.endswith(".com") and '@' in email and len(password) >= 5:
         console.print("[bold green]Login successful![/bold green]")
         with open("manba.txt","a") as f:
-            f.write(email ) 
+            f.write(email) 
             f.write("   ")
             f.write(username)
             f.write("   ")
-            f.write(password)
+            f.write(hashh(password))
             f.write("\n") 
             f.close()
         return User(username, password)
@@ -104,9 +107,7 @@ def check_pass(input_email_orUser, input_password, file_path):
 
         for i in range(0, len(lines), 1):  # Increment by 1 to read each line
             email, username, password = lines[i].strip().split()  # Split each line into email, username, and password
-
-            print(f"Checking: {email}, {username}, {password}")  # Debugging statement
-
+            
             if (email == input_email_orUser or username == input_email_orUser) and password == input_password:
                 return True
     except Exception as e:
@@ -153,6 +154,16 @@ def display_user_page(user):
         else:
             console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
+
+def hashh(password):
+    passwordcopy = password.encode("utf-8")
+    p = hashlib.sha256(passwordcopy).digest()
+    return p.hex()
+
+def dis_hashh(password):
+    h = hashlib.sha256(password.encode("utf-8")).digest()
+    return h.hex()
+
 def main():
     console = Console()
     while True:
@@ -162,11 +173,11 @@ def main():
             if user:
                 display_user_page(user)
         elif choice == "2" :
-            nam= input("enter your email or username\n")
+            nam= Prompt.ask("enter your email or username\n")
             if login(nam)==1:
                 print("A")
-            ramz = input("Enter Your Pass:\n")
-            if check_pass(nam, ramz, "manba.txt"):
+            ramz = Prompt.ask("Enter Your Pass:\n", ramz = True)
+            if check_pass(nam, hashh(ramz), "manba.txt"):
                 print("log in sucsusfully!\n")
                 user = login_acc(nam, ramz)
                 display_user_page(user) 
@@ -175,7 +186,7 @@ def main():
                 return
         elif choice == "3":
             console.print("[bold]Goodbye![/bold]")
-            break
+            exit()
         else:
             console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
