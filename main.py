@@ -1,7 +1,6 @@
 from rich.prompt import Prompt
 from rich.console import Console
 
-
 class Task:
     def __init__(self, task_id, title, description, assigned_to):
         self.task_id = task_id
@@ -79,7 +78,9 @@ def create_acc():
             f.write(email ) 
             f.write("   ")
             f.write(username)
-            f.write("\n")
+            f.write("   ")
+            f.write(password)
+            f.write("\n") 
             f.close()
         return User(username, password)
     else:
@@ -131,23 +132,22 @@ def login(esm):
             a = 1
     return a
             
-def check_credentials(input_email, input_username, input_password, file_path):
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
+def check_pass(input_email_orUser, input_password, file_path):
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
 
-    for i in range(0, len(lines), 3):  # Assuming the file structure is email, username, password
-        try:
-            email = lines[i].strip()
-            username = lines[i+1].strip()
-            password = lines[i+2].strip()
-        except IndexError:
-            
-            return False
+        for i in range(0, len(lines), 1):  # Increment by 1 to read each line
+            email, username, password = lines[i].strip().split()  # Split each line into email, username, and password
 
-        if email == input_email and username == input_username and password == input_password:
-            return True
+            print(f"Checking: {email}, {username}, {password}")  # Debugging statement
 
-    return False 
+            if (email == input_email_orUser or username == input_email_orUser) and password == input_password:
+                return True
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    return False
     
 def main():
     console = Console()
@@ -176,9 +176,14 @@ def main():
         #        display_user_page(user)
         elif choice == "2" :
             nam= input("enter your email or username\n")
-            user(nam,None)
+            
             if login(nam)==1:
-                
+                print("A")
+            ramz = input("Enter Your Pass:\n")
+            if check_pass(nam, ramz, "manba.txt"):
+                print("meo") 
+            elif check_pass(nam, ramz, "manba.txt")==False:
+                print("ff")
             
         elif choice == "3":
             console.print("[bold]Goodbye![/bold]")
