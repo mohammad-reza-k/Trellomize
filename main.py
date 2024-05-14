@@ -50,8 +50,11 @@ class Project:
         self.members.append(member)
 
     def view_members(self):
-        for member in self.members:
-            print(f"\nMembers:\n{member.username}\n")
+        if len(self.members) == 0:
+            print("No users yet\n")
+        else:
+            for member in self.members:
+                print(f"\nMembers:\n{member.username}\n")
 
 class User:
     def __init__(self, username, password):
@@ -92,6 +95,7 @@ def display_user_page(user):
                 console.print("[bold blue]Your Projects:[/bold blue]")
                 for project in user.projects:
                     console.print(f"Project ID: {project.project_id}, Title: {project.title}, Creator: {project.creator}")
+                    project.add_member(user.username)
                     # Added logic to view and add members
                 for project in user.projects:
                     ch = Prompt.ask("\n1.View Members\n2.Add Member")
@@ -99,8 +103,11 @@ def display_user_page(user):
                         project.view_members()
                     elif ch == '2':
                         username_to_add = Prompt.ask("Enter username to add:")
-                        project.add_member(username_to_add)
-                        console.print("[bold green]Member added successfully![/bold green]")
+                        if username_to_add in project:
+                            print("Already exist\n")
+                        else:
+                            project.add_member(username_to_add)
+                            console.print("[bold green]Member added successfully![/bold green]")
         elif choice == "3":
             username_to_view = Prompt.ask("Enter username of the user you want to view:")
             console.print(f"[bold blue]Viewing profile of user: {username_to_view}[/bold blue]")
