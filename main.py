@@ -65,18 +65,54 @@ class User:
     def create_project(self, project_id, title):
         project = Project(project_id, title, self.username)
         self.projects.append(project)
-
-def login():
+        
+def create_acc():
     console = Console()
     email = Prompt.ask("Enter your email:")
+    if login(email)==1:
+        print("You Already Have An Account")
+        return
     username = Prompt.ask("Enter your username:")
     password = Prompt.ask("Enter your password:", password=True)
-    if email.endswith(".com") and '@' in email and username[0].isupper() and len(password) >= 5:
+    if email.endswith(".com") and '@' in email and len(password) >= 5:
         console.print("[bold green]Login successful![/bold green]")
+        with open("manba.txt","a") as f:
+            f.write(email ) 
+            f.write("   ")
+            f.write(username)
+            f.write("   ")
+            f.write(password)
+            f.write("\n") 
+            f.close()
         return User(username, password)
     else:
         console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
         return None
+def login_acc(username, password):
+    return User(username, password)
+def login(esm):
+    a = 0
+    with open ("manba.txt" , "r") as file:
+        content = file.read()
+        if esm in content:
+            a = 1
+    return a
+def check_pass(input_email_orUser, input_password, file_path):
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        for i in range(0, len(lines), 1):  # Increment by 1 to read each line
+            email, username, password = lines[i].strip().split()  # Split each line into email, username, and password
+
+            print(f"Checking: {email}, {username}, {password}")  # Debugging statement
+
+            if (email == input_email_orUser or username == input_email_orUser) and password == input_password:
+                return True
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    return False
+    
 
 def display_user_page(user):
     console = Console()
@@ -118,9 +154,30 @@ def display_user_page(user):
             console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
 def main():
-    user = login()
-    if user:
-        display_user_page(user)
+    console = Console()
+    while True:
+        choice = Prompt.ask("\nSelect an option:\n1. Create Account\n2. Login\n3. Exit\n")
+        if choice == "1":
+            user = create_acc()
+            if user:
+                display_user_page(user)
+        elif choice == "2" :
+            nam= input("enter your email or username\n")
+            if login(nam)==1:
+                print("A")
+            ramz = input("Enter Your Pass:\n")
+            if check_pass(nam, ramz, "manba.txt"):
+                print("log in sucsusfully!\n")
+                user = login_acc(nam, ramz)
+                display_user_page(user) 
+            elif not check_pass(nam, ramz, "manba.txt"):
+                print("ٌWrong username, email or password!!\n")
+                return
+        elif choice == "3":
+            console.print("[bold]Goodbye![/bold]")
+            break
+        else:
+            console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
 if __name__ == "__main__":
     main()
