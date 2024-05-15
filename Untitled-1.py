@@ -7,15 +7,19 @@ import os
 import uuid
 import json
 file = "data.json"
-# data = {
-#     "username": [],
-#     "email": [],
-#     "password": [],
-#     "projects": {
-#         "tasks": {"titles": {"assignees":[]}},
-#         "members": {"usernames": []}
-#     }
-# }
+data = {
+    "username": [],
+    "email": [],
+    "password": [],
+    "projects": [
+        {
+            "titles": [],
+            "members": {"usernames":[]},
+            "tasks": [{"names":[{"assighnees":[]}]}]
+        }
+    ]
+}
+
 def load_data():
     try:
         with open(file, 'r') as f:
@@ -25,16 +29,37 @@ def load_data():
             "username": [],
             "email": [],
             "password": [],
-            "projects": {
-                "tasks": {"titles": {"assignees":[]}},
-                "members": {"usernames": []}
-            }
+            "projects": [
+                {
+                    "titles": [],
+                    "members": {"usernames":[]},
+                    "tasks": [{"names":[{"assighnees":[]}]}]
+                }
+            ]
         }
         
 def save_data(data_dic):
     with open(file, 'w') as json_file:
         json.dump(data_dic, json_file, indent=4)
-                
+
+def appendt(data_dic, value):
+    for project in data_dic["projects"]:
+        project['titles'].append(value)
+        
+def appendm(data_dic, value):
+    for project in data_dic["projects"]:
+            project['members']["usernames"].append(value)
+            
+def appendas(data_dic, value):
+    for project in data_dic["projects"]:
+            for tasks in project["tasks"]:
+                for name in tasks["names"]:
+                    name["assignees"].append(value)#assighn
+def appendn(data_dic, value):
+    for project in data_dic["projects"]:
+            for tasks in project["tasks"]:
+                tasks["names"].append(value)
+            
 class Priority(Enum):
     CRITICAL = auto()
     HIGH = auto()
@@ -69,7 +94,8 @@ class Project:
         task = Task(title, description, None, None, None, None)
         self.tasks.append(task)
         data_dic=load_data()
-        data_dic["projects"]["tasks"].append(task.title)
+        appendn(data_dic, task.title)
+        # data_dic["projects"][0]["tasks"]["names"].append(task.title)
         save_data(data_dic)
         
     def assign_task(self, title, assigned_to):
@@ -82,7 +108,8 @@ class Project:
                     member = User(assigned_to, None)  # Replace None with actual password if available
                     self.members.append(member)
                     data_dic=load_data()
-                    data_dic["projects"]["members"].append(member.username)
+                    appendas(data_dic, member.username)
+                    #data_dic["projects"]["names"]["assighnees"].append(member.username)
                     save_data(data_dic)
                 return True
         return False
@@ -103,7 +130,8 @@ class Project:
         member = User(username, None)  
         self.members.append(member)
         data_dic=load_data()
-        data_dic["projects"]["members"].append(member.username)
+        appendm(data_dic, member.username)
+        #data_dic["projects"]["members"]["usernames"].append(member.username)
         save_data(data_dic)
         
     def view_members(self):
@@ -121,17 +149,18 @@ class User:
         self.is_activate = False
 
 
-    def create_project(self, project_id, title):
+    def create_project(self, title):
         project = Project(title, self.username)
         self.projects.append(project)
         data_dic=load_data()
-        data_dic["projects"]["tasks"].append(project.title)
+        appendt(data_dic, project.title)
+        #data_dic["projects"].append(["title"].append(project.title))
         save_data(data_dic) 
                
 def create_acc():
     console = Console()
     email = Prompt.ask("Enter your email:")
-    if login(email)==1:#تغییر بده
+    if login(email)==1:
         print("You Already Have An Account")
         return
     username = Prompt.ask("Enter your username:")
@@ -158,29 +187,25 @@ def login(esm):
             a = 1
     return a
 
-
-# def check_pass(input_email_orUser, input_password):
-#     try:
-#         with open(file, 'r') as f:
-#             data_dic = json.load(f)
-        
-#         for email, username, password in zip(data_dic['email'], data_dic['username'], data_dic['password']):
-#             if (email == input_email_orUser or username == input_email_orUser) and password == input_password:
-#                 return True
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#     return False
+def check_pass(input_email_orUser, input_password):
+    try:
+        data_dic = load_data()
+        for email, username, password in zip(data_dic['email'], data_dic['username'], data_dic['password']):
+            if (email == input_email_orUser or username == input_email_orUser) and password == input_password:
+                return True
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    return False
     
 
 def display_user_page(user):
     console = Console()
-    console.print(f"Welcome, {user.username}!")
+    console.print(f"Welcome, [blue]{user.username}![/blue]")
     while True:
         choice = Prompt.ask("\nSelect an option:\n1. Create Project\n2. View Projects\n3. View Other User\n4. Exit\n")
         if choice == "1":
-            project_id = Prompt.ask("Enter project ID:")
             title = Prompt.ask("Enter project title:")
-            user.create_project(project_id, title)
+            user.create_project(title)
             console.print("[bold green]Project created successfully![/bold green]")
         elif choice == "2":
             json.load(file)
@@ -231,17 +256,15 @@ def main():
             if user:
                 display_user_page(user)
         elif choice == "2" :
-            nam= Prompt.ask("enter your email or username\n")
-            if login(nam)==1:
-                print("A")
-            # ramz = Prompt.ask("Enter Your Pass:\n", ramz = True)
-            # if check_pass(nam, hashh(ramz), "manba.txt"):
-            #     print("log in sucsusfully!\n")
-            #     user = login_acc(nam, ramz)
-            #     display_user_page(user) 
-            # elif not check_pass(nam, ramz, "manba.txt"):
-            #     print("ٌWrong username, email or password!!\n")
-            #     return
+            nam= Prompt.ask("enter your email or username")
+            ramz = Prompt.ask("Enter Your Password:", password=True)
+            if check_pass(nam, hashh(ramz)):
+                console.print("[bold green]log in sucsusfully![/bold green]\n")
+                user = login_acc(nam, ramz)
+                display_user_page(user) 
+            elif not check_pass(nam, ramz):
+                print("ٌWrong username, email or password!!\n")
+                return
         elif choice == "3":
             console.print("[bold]Goodbye![/bold]")
             exit()
