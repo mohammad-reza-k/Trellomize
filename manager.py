@@ -26,6 +26,10 @@ def main():
             # Create mode info file
             with open(mode_info_file, "w") as file:
                 file.write("Mode information of the system")
+                
+def activate_account(user):
+    user.is_active = True
+    print(f"Account for {user.username} has been activated.")
 
 if __name__ == "__main__":
     main()

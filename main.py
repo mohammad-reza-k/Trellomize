@@ -3,6 +3,8 @@ from rich.console import Console
 import hashlib
 import os
 import uuid
+from datetime import datetime
+from enum import Enum, auto
 
 class Task:
     def __init__(self, task_id, title, description, assigned_to):
@@ -10,6 +12,19 @@ class Task:
         self.title = title
         self.description = description
         self.assigned_to = assigned_to
+
+class Priority(Enum):
+    CRITICAL = auto()
+    HIGH = auto()
+    MEDIUM = auto()
+    LOW = auto()
+
+class Status(Enum):
+    BACKLOG = auto()
+    TODO = auto()
+    DOING = auto()
+    DONE = auto()
+    ARCHIVED = auto()
 
 class Project:
     def __init__(self, project_id, title, creator):
@@ -68,6 +83,14 @@ class User:
     def create_project(self, project_id, title):
         project = Project(project_id, title, self.username)
         self.projects.append(project)
+        with open("projects.txt", 'a') as f:
+            f.write(self.username) 
+            f.write("   ")
+            f.write(project_id)
+            f.write("   ")
+            f.write(title)
+            f.write("\n") 
+            f.close()
         
 def create_acc():
     console = Console()
@@ -101,6 +124,7 @@ def login(esm):
             a = 1
     return a
 def check_pass(input_email_orUser, input_password, file_path):
+    console = Console()
     try:
         with open(file_path, 'r') as file:
             lines = file.readlines()
@@ -111,7 +135,7 @@ def check_pass(input_email_orUser, input_password, file_path):
             if (email == input_email_orUser or username == input_email_orUser) and password == input_password:
                 return True
     except Exception as e:
-        print(f"An error occurred: {e}")
+        console.print(f"[bold red]An error occurred: {e}[/bold red]")
     return False
     
 
@@ -126,13 +150,14 @@ def display_user_page(user):
             user.create_project(project_id, title)
             console.print("[bold green]Project created successfully![/bold green]")
         elif choice == "2":
-            if not user.projects:
+            if not "projects.txt":
                 console.print("[bold yellow]You have no projects yet.[/bold yellow]")
             else:
                 console.print("[bold blue]Your Projects:[/bold blue]")
-                for project in user.projects:
-                    console.print(f"Project ID: {project.project_id}, Title: {project.title}, Creator: {project.creator}")
-                    project.add_member(user.username)
+                # for project in user.projects:
+                #     console.print(f"Project ID: {project.project_id}, Title: {project.title}, Creator: {project.creator}")
+                #     project.add_member(user.username)
+                
                     # Added logic to view and add members
                 for project in user.projects:
                     ch = Prompt.ask("\n1.View Members\n2.Add Member")
@@ -156,8 +181,7 @@ def display_user_page(user):
 
 
 def hashh(password):
-    passwordcopy = password.encode("utf-8")
-    p = hashlib.sha256(passwordcopy).digest()
+    p = hashlib.sha256(password.encode("utf-8")).digest()
     return p.hex()
 
 def dis_hashh(password):
@@ -176,7 +200,7 @@ def main():
             nam= Prompt.ask("enter your email or username\n")
             if login(nam)==1:
                 print("A")
-            ramz = Prompt.ask("Enter Your Pass:\n", ramz = True)
+            ramz = Prompt.ask("Enter Your Pass:\n", password= True)
             if check_pass(nam, hashh(ramz), "manba.txt"):
                 print("log in sucsusfully!\n")
                 user = login_acc(nam, ramz)
