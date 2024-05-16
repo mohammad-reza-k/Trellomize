@@ -4,12 +4,14 @@ from rich.table import Table
 import hashlib
 import os
 import uuid
+import fontstyle
 from datetime import datetime
 from enum import Enum, auto
 import json
+import time
+
+
 file = "tasks.json"
-projects_by_user = {}
-# Assuming projects_by_user is a dictionary defined outside the function
 projects_by_user = {}
 
 def add_project():
@@ -135,7 +137,7 @@ def create_acc():
     console = Console()
     email = Prompt.ask("Enter your email:")
     if login(email)==1:
-        console.print("[blue]this account already exist[/blue]\n")
+        console.print("[bold blue]this account already exist[/bold blue]\n")
         return
     username = Prompt.ask("Enter your username:")
     password = Prompt.ask("Enter your password:", password=True)
@@ -155,13 +157,15 @@ def create_acc():
         return None
 def login_acc(username, password):
     return User(username, password)
-def login(esm):
+def login(username):
     a = 0
     with open ("manba.txt" , "r") as file:
         content = file.read()
-        if esm in content:
+        if username in content:
             a = 1
     return a
+
+        
 def check_pass(input_email_orUser, input_password, file_path):
     console = Console()
     try:
@@ -180,7 +184,7 @@ def check_pass(input_email_orUser, input_password, file_path):
 
 def display_user_page(user):
     console = Console()
-    console.print(f"[bold green]Welcome, {user.username}![/bold green]")
+    print(fontstyle.apply(f"Well come {user.username}", 'bold/italic/green'))
     while True:
         choice = Prompt.ask("\nSelect an option:\n1. Create Project\n2. View Projects\n3. View Other User\n4. Exit\n")
         if choice == "1":
@@ -230,6 +234,7 @@ def dis_hashh(password):
 
 def main():
     console = Console()
+    x = 0
     while True:
         choice = Prompt.ask("\nSelect an option:\n1. Create Account\n2. Login\n3. Exit\n")
         if choice == "1":
@@ -238,19 +243,28 @@ def main():
                 display_user_page(user)
         elif choice == "2" :
             nam= Prompt.ask("enter your email or username\n")
-            ramz = Prompt.ask("Enter Your Pass:\n", password= True)
+            ramz = Prompt.ask("Enter Your Pass:\n")
             if check_pass(nam, hashh(ramz), "manba.txt"):
-                console.print("[green]log in sucsusfully![/green]\n")
+                console.print("[bold green]log in sucsusfully![/bold green]\n")
                 user = login_acc(nam, ramz)
                 display_user_page(user) 
             elif not check_pass(nam, ramz, "manba.txt"):
-                console.print("[bold red]Wrong username, email or password!![/bold red]\n")
-                return
+                x+=1
+                console.print(f"[bold red]Wrong username, email or password!![/bold red]\n[yellow]attemp {x} of 4[/yellow]\n")
+                if x == 4:
+                    console.print("[bold red]try again later[/bold red]")
+                    exit()
+                    
         elif choice == "3":
             console.print("[bold red]Goodbye![/bold red]")
             exit()
         else:
-            console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
+            x+=1
+            console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]\n[yellow]attemp {x} of 4[/yellow]\n")
+            if x == 4:
+                console.print("[bold red]try again later[/bold red]")
+                exit()
+
 
 if __name__ == "__main__":
     main()
