@@ -135,7 +135,7 @@ def create_acc():
     console = Console()
     email = Prompt.ask("Enter your email:")
     if login(email)==1:
-        console.print("[blue]You Already Have An Account[/blue]\n")
+        console.print("[blue]this account already exist[/blue]\n")
         return
     username = Prompt.ask("Enter your username:")
     password = Prompt.ask("Enter your password:", password=True)
