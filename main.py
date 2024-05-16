@@ -120,6 +120,7 @@ class User:
     def __init__(self, username, password):
         self.username = username
         self.password = password
+        self.is_activate = True
         # self.projects = []
 
     def create_project(self, title):
@@ -145,10 +146,11 @@ def create_acc():
         console.print("[bold green]Login successful![/bold green]")
         with open("manba.txt","a") as f:
             f.write(email) 
-            f.write("   ")
+            f.write(" ")
             f.write(username)
-            f.write("   ")
+            f.write(" ")
             f.write(hashh(password))
+            f.write("T")
             f.write("\n") 
             f.close()
         return User(username, password)
@@ -173,10 +175,13 @@ def check_pass(input_email_orUser, input_password, file_path):
             lines = file.readlines()
 
         for i in range(0, len(lines), 1):  # Increment by 1 to read each line
-            email, username, password = lines[i].strip().split()  # Split each line into email, username, and password
+            email, username, password, act = lines[i].strip().split()  # Split each line into email, username, and password
             
-            if (email == input_email_orUser or username == input_email_orUser) and password == input_password:
+            if (email == input_email_orUser or username == input_email_orUser) and password == input_password and act=="T":
                 return True
+            if act == "F":
+                console.print("[bold red]you are baned go to the manager[/bold red]")
+                
     except Exception as e:
         console.print(f"[bold red]An error occurred: {e}[/bold red]")
     return False
@@ -186,43 +191,42 @@ def display_user_page(user):
     console = Console()
     print(fontstyle.apply(f"Well come {user.username}", 'bold/italic/green'))
     while True:
-        choice = Prompt.ask("\nSelect an option:\n1. Create Project\n2. View Projects\n3. View Other User\n4. Exit\n")
-        if choice == "1":
-            title = Prompt.ask("Enter project title:")
-            user.create_project(title)
-            console.print("[bold green]Project created successfully![/bold green]")
-        elif choice == "2":
-            dic = add_project()
-            if not user.username in dic.keys():
-                console.print("[bold yellow]You have no projects yet.[/bold yellow]")
+            choice = Prompt.ask("\nSelect an option:\n1. Create Project\n2. View Projects\n3. View Other User\n4. Exit\n")
+            if choice == "1":
+                title = Prompt.ask("Enter project title:")
+                user.create_project(title)
+                console.print("[bold green]Project created successfully![/bold green]")
+            elif choice == "2":
+                dic = add_project()
+                if not user.username in dic.keys():
+                    console.print("[bold yellow]You have no projects yet.[/bold yellow]")
+                else:
+                    table = Table(title="Your Projects")
+                    for i in dic.keys():
+                        if i==user.username:
+                            table.add_column("Name", style="cyan", no_wrap=True)
+                            table.add_column("Description", style="magenta")
+                            table.add_row(f"{dic[i]}", "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal")
+                    console.print(table)
+                        # Added logic to view and add members
+                    # for project in dic.values():
+                    #     ch = Prompt.ask("\n1.View Members\n2.Add Member")
+                    #     if ch == '1':
+                    #         project.view_members()
+                    #     elif ch == '2':
+                    #         username_to_add = Prompt.ask("Enter username to add:")
+                    #         if username_to_add in project:
+                    #             print("Already exist\n")
+                    #         else:
+                    #             project.add_member(username_to_add)
+                    #             console.print("[bold green]Member added successfully![/bold green]")
+            elif choice == "3":
+                username_to_view = Prompt.ask("Enter username of the user you want to view:")
+                console.print(f"[bold blue]Viewing profile of user: {username_to_view}[/bold blue]")
+            elif choice == "4":
+                break
             else:
-                table = Table(title="Your Projects")
-                for i in dic.keys():
-                    if i==user.username:
-                        table.add_column("Name", style="cyan", no_wrap=True)
-                        table.add_column("Description", style="magenta")
-                        table.add_row(f"{dic[i]}", "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal")
-                console.print(table)
-                    # Added logic to view and add members
-                # for project in dic.values():
-                #     ch = Prompt.ask("\n1.View Members\n2.Add Member")
-                #     if ch == '1':
-                #         project.view_members()
-                #     elif ch == '2':
-                #         username_to_add = Prompt.ask("Enter username to add:")
-                #         if username_to_add in project:
-                #             print("Already exist\n")
-                #         else:
-                #             project.add_member(username_to_add)
-                #             console.print("[bold green]Member added successfully![/bold green]")
-        elif choice == "3":
-            username_to_view = Prompt.ask("Enter username of the user you want to view:")
-            console.print(f"[bold blue]Viewing profile of user: {username_to_view}[/bold blue]")
-        elif choice == "4":
-            break
-        else:
-            console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
-
+                console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
 def hashh(password):
     p = hashlib.sha256(password.encode("utf-8")).digest()
