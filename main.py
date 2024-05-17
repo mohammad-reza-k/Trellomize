@@ -150,6 +150,7 @@ def create_acc():
             f.write(username)
             f.write(" ")
             f.write(hashh(password))
+            f.write(" ")
             f.write("T")
             f.write("\n") 
             f.close()
@@ -202,11 +203,13 @@ def display_user_page(user):
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
                 else:
                     table = Table(title="Your Projects")
-                    for i in dic.keys():
+                    table.add_column("Name", style="cyan", no_wrap=True)
+                    table.add_column("Description", style="magenta")
+                    print(projects_by_user)
+                    for i in dic:
                         if i==user.username:
-                            table.add_column("Name", style="cyan", no_wrap=True)
-                            table.add_column("Description", style="magenta")
-                            table.add_row(f"{dic[i]}", "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal")
+                            for j in range(len(dic[i])):
+                                table.add_row(f"{dic[i][j]}", "rr")
                     console.print(table)
                         # Added logic to view and add members
                     # for project in dic.values():
