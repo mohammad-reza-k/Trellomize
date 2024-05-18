@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum, auto
 import json
 import time
-
+import manager
 
 file = "tasks.json"
 projects_by_user = {}
@@ -151,8 +151,9 @@ def create_acc():
             f.write(username)
             f.write(" ")
             f.write(hashh(password))
+            f.write(" ")
             f.write("T")
-            f.write("\n")
+            f.write(" \n")
         with open("manage.txt", "a") as file:
             file.write(email)
             file.write(" \n")
@@ -220,6 +221,24 @@ def check_pass(input_email_orUser, input_password, file_path):
     except Exception as e:
         console.print(f"[bold red]An error occurred: {e}[/bold red]")
     return False
+
+def check_admin(input_email_orUser, input_password, file_path):
+    console = Console()
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        for i in range(0, len(lines), 1):  # Increment by 1 to read each line
+            username, password, act = lines[i].strip().split()  # Split each line into email, username, and password
+            
+            if username == input_email_orUser and password == input_password:
+                print("kos nanat")
+                return True
+            
+    except Exception as e:
+        console.print(f"[bold red]An error occurred: {e}[/bold red]")
+    return False
+    
     
 
 def display_user_page(user):
@@ -237,11 +256,12 @@ def display_user_page(user):
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
                 else:
                     table = Table(title="Your Projects")
-                    for i in dic.keys():
+                    table.add_column("Name", style="cyan", no_wrap=True)
+                    table.add_column("Description", style="magenta")
+                    for i in dic:
                         if i==user.username:
-                            table.add_column("Name", style="cyan", no_wrap=True)
-                            table.add_column("Description", style="magenta")
-                            table.add_row(f"{dic[i]}", "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal")
+                            for j in range(len(dic[i])):
+                                table.add_row(f"{dic[i][j]}", "rr")
                     console.print(table)
                         # Added logic to view and add members
                     # for project in dic.values():
@@ -283,10 +303,12 @@ def main():
         elif choice == "2" :
             nam= Prompt.ask("enter your email or username\n")
             ramz = Prompt.ask("Enter Your Pass:\n")
-            if login(nam):
+            
+            if check_admin(nam , ramz ,"adminfile.txt"):
+                print("meow")
+               
+            elif check_pass(nam, hashh(ramz), "manba.txt"):
                 tedad_vorood(nam , "manage.txt")
-            if check_pass(nam, hashh(ramz), "manba.txt"):
-                
                 console.print("[bold green]log in sucsusfully![/bold green]\n")
                 user = login_acc(nam, ramz)
                 display_user_page(user) 

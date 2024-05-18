@@ -19,13 +19,11 @@ def main():
         create_admin(args.username, args.password)
         
         # Check if mode info file exists
-        mode_info_file = "Fa_Haile_Rouge_Mode_Info.txt"
-        if os.path.exists(mode_info_file):
-            print("Mode information file already exists.")
-        else:
-            # Create mode info file
-            with open(mode_info_file, "w") as file:
-                file.write("Mode information of the system")
+        mode_info_file = "adminfile.txt"
+        with open(mode_info_file, "w") as file:
+            file.write(args.username)
+            file.write(" ")
+            file.write(args.password)
                 
 def activate_account(user, command):
     if command=="activate":
@@ -57,5 +55,24 @@ def eliminate():
     with open('manba.txt', 'w'):
         pass
 
+
+
+def purge_data():
+    confirmation = input("Are you sure you want to purge all data? (yes/no): ")
+    if confirmation.lower() == "yes":
+        # Open the file in write mode to clear its contents
+        with open("manba.txt", "w") as f:
+            f.write("")  # Writing an empty string effectively clears the file
+        print("All data has been purged successfully.")
+    else:
+        print("Operation cancelled.")
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Purge data from the system.")
+    parser.add_argument("action", choices=["purge-data"], help="Action to perform")
+    args = parser.parse_args()
+
+    if args.action == "purge-data":
+        purge_data()
+    else:
+        print("Invalid action. Please specify 'purge-data'.")
