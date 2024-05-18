@@ -222,22 +222,14 @@ def check_pass(input_email_orUser, input_password, file_path):
         console.print(f"[bold red]An error occurred: {e}[/bold red]")
     return False
 
-def check_admin(input_email_orUser, input_password, file_path):
-    console = Console()
-    try:
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-
-        for i in range(0, len(lines), 1):  # Increment by 1 to read each line
-            username, password, act = lines[i].strip().split()  # Split each line into email, username, and password
-            
-            if username == input_email_orUser and password == input_password:
-                print("kos nanat")
-                return True
-            
-    except Exception as e:
-        console.print(f"[bold red]An error occurred: {e}[/bold red]")
-    return False
+def check_admin(username , passw):
+    a = 0
+    with open ("adminfile.txt" , "r") as file:
+        content = file.read()
+        if (username and passw) in content:
+            a = 1
+        
+    return a
     
     
 
@@ -304,7 +296,7 @@ def main():
             nam= Prompt.ask("enter your email or username\n")
             ramz = Prompt.ask("Enter Your Pass:\n")
             
-            if check_admin(nam , ramz ,"adminfile.txt"):
+            if check_admin(nam , ramz ):
                 print("meow")
                
             elif check_pass(nam, hashh(ramz), "manba.txt"):
