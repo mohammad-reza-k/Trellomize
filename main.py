@@ -16,6 +16,9 @@ projson = "projects.json"
 projects_by_user = {}
 task_by_user = {}
 
+def clear_console():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    
 def add_project():
     with open('projects.txt', 'r') as file:
         for line in file:
@@ -171,10 +174,54 @@ def create_acc():
             f.write("T")
             f.write("\n") 
             f.close()
+            with open("manage.txt", "a") as file:
+                file.write(email)
+                file.write(" \n")
+
         return User(username, password)
     else:
         console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
         return None
+# def tedad_vorood(word, file_path):
+#     with open(file_path, 'r+') as file:
+#         content = file.read()
+#         word_start = content.find(word)
+        
+#         if word_start == -1:  # Word not found
+#             print(f"Word '{word}' not found in the file.")
+#             return
+        
+#         number_start = word_start + len(word)  # Start index of the number
+#         while number_start < len(content) and content[number_start] == ' ':
+#             number_start += 1
+        
+#         number_end = number_start
+
+#         # Find the end of the number
+#         while number_end < len(content) and content[number_end].isdigit():
+#             number_end += 1
+
+#         if number_start == number_end:  # No number found after the word
+#             number = 1
+#             new_content = content[:number_start] + " 1" + content[number_end:]
+#         else:
+#             number = int(content[number_start:number_end]) + 1
+#             new_content = content[:number_start] + str(number) + content[number_end:]
+        
+#         # Move the file cursor to the beginning and write the new content
+#         file.seek(0)
+#         file.write(new_content)
+#         file.truncate()
+
+def check_admin(username , passw):
+    a = 0
+    with open ("adminfile.txt" , "r") as file:
+        content = file.read()
+        if (username and passw) in content:
+            a = 1
+        
+    return a
+
 def login_acc(username, password):
     return User(username, password)
 def login(username):
@@ -211,10 +258,12 @@ def display_user_page(user):
     while True:
             choice = Prompt.ask("\nSelect an option:\n1. Create Project\n2. View Projects\n3. View Other User\n4. Exit\n")
             if choice == "1":
+                clear_console()
                 title = Prompt.ask("Enter project title:")
                 user.create_project(title)
                 console.print("[bold green]Project created successfully![/bold green]")
             elif choice == "2":
+                clear_console()
                 dic = add_project()
                 if not user.username in dic.keys():
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
@@ -231,10 +280,10 @@ def display_user_page(user):
                         console.print(table)
                         ch = Prompt.ask("\n1.View Tasks \n2.Assigne tasks\n3. Exit\n")
                         if ch=='1':
+                            clear_console()
                             project = Prompt.ask("Enter your projects name you want:\n")
                             if project in dic[user.username]:
                                 dicc = add_task()
-                                print(dic,dicc)
                                 if project in dicc.keys():
                                 #view tasks are in
                                     while True:
@@ -250,45 +299,60 @@ def display_user_page(user):
                                         pro = return_project(project, user.username)
                                         option = Prompt.ask("1.add new task\n2.delete a task\n3.exit\n")
                                         if option == '1':
+                                            clear_console()
                                             name = Prompt.ask("Enter the Name of the task:")
                                             discription = Prompt.ask("what dis cription for the task you want to add:")
                                             pro.create_task(name, discription)
                                         #new task with priority
                                         elif option == '2':
+                                            clear_console()
                                             pass#deleting
                                         elif option == '3':
+                                            clear_console()
                                             break
                                         else:
+                                            clear_console()
                                             console.print("[bold red]invalid choice[/bold red]\n")
                                         
                                 else:
+                                    clear_console()
                                     console.print("No tasks yet\n")#return??
                                     pro = return_project(project, user.username)
                                     option = Prompt.ask("1.add new task\n2.delete a task\n3.exit\n")
                                     if option == '1':
+                                        clear_console()
                                         name = Prompt.ask("Enter the Name of the task:")
                                         discription = Prompt.ask("what dis cription for the task you want to add:")
                                         pro.create_task(name, discription)
                                     #new task with priority
                                     elif option == '2':
+                                        clear_console()
                                         pass#deleting
                                     else:
+                                        clear_console()
                                         break
 
                             else:
+                                clear_console()
                                 console.print("[bold red]No such a project[/bold red]\n")#return??
                         elif ch == '2':
+                            clear_console()
                             option = Prompt.ask("Enter name of a member")#and check meber and task and check task and add to a file 
                         elif ch == '3':
+                            clear_console()
                             break
                         else:
+                            clear_console()
                             console.print("[bold yellow]Invalid choice[/bold yellow]\n")
             elif choice == "3":
+                clear_console()
                 username_to_view = Prompt.ask("Enter username of the user you want to view:")
                 console.print(f"[bold blue]Viewing profile of user: {username_to_view}[/bold blue]")
             elif choice == "4":
+                clear_console()
                 break
             else:
+                clear_console()
                 console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
 
 def hashh(password):
@@ -305,12 +369,17 @@ def main():
     while True:
         choice = Prompt.ask("\nSelect an option:\n1. Create Account\n2. Login\n3. Exit\n")
         if choice == "1":
+            clear_console()
             user = create_acc()
             if user:
                 display_user_page(user)
         elif choice == "2" :
+            clear_console()
             nam= Prompt.ask("enter your email or username\n")
             ramz = Prompt.ask("Enter Your Pass:\n")
+            # if check_admin(nam , ramz ):
+            #     print("meow")
+
             if check_pass(nam, hashh(ramz), "manba.txt"):
                 console.print("[bold green]log in sucsusfully![/bold green]\n")
                 user = login_acc(nam, ramz)
@@ -323,9 +392,11 @@ def main():
                     exit()
                     
         elif choice == "3":
+            clear_console()
             console.print("[bold red]Goodbye![/bold red]")
             exit()
         else:
+            clear_console()
             x+=1
             console.print(f"[bold red]Invalid choice. Please select a valid option.[/bold red]\n[yellow]attemp {x} of 4[/yellow]\n")
             if x == 4:
