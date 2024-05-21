@@ -11,7 +11,8 @@ import json
 import time
 import manager
 
-file = "tasks.json"
+taskjson = "tasks.json"
+projson = "projects.json"
 projects_by_user = {}
 task_by_user = {}
 
@@ -24,7 +25,7 @@ def add_project():
                     projects_by_user[username].append(project_name)
             else:
                 projects_by_user[username] = [project_name]
-    save_data(projects_by_user)
+    save_data(projects_by_user, projson)
     return projects_by_user
 
 def add_task():
@@ -32,11 +33,11 @@ def add_task():
         for line in file:
             project_name, task_name, discription = line.strip().split(' ')  
             if project_name in task_by_user:
-                if project_name not in task_by_user[project_name]:
+                if task_name not in task_by_user[project_name]:
                     task_by_user[project_name].append(task_name)
             else:
                 task_by_user[project_name] = [task_name]
-    save_data(task_by_user)
+    save_data(task_by_user, taskjson)
     return task_by_user
 
     
@@ -59,20 +60,17 @@ class Status(Enum):
     DONE = auto()
     ARCHIVED = auto()
 
-def load_data():
+def load_data(files):
     try:
-        with open(file, 'r') as f:
+        with open(files, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
         return {
             "tasks":[],
-            "members":[],
-            "taskassigne":[],
-            "taskdiscription":[]
         }
 
-def save_data(data_dic):
-    with open(file, 'w') as json_file:
+def save_data(data_dic, files):
+    with open(files, 'w') as json_file:
         json.dump(data_dic, json_file, indent=4)
 
 class Project:
@@ -96,11 +94,11 @@ class Project:
             add_task()
 
     def assign_task(self, title, assigned_to):
-        dic = load_data()
+        dic = load_data(projson)
         for task in dic["tasks"]:
             if task == title:
                 dic["taskassigne"].append(assigned_to)
-                save_data(dic)
+                save_data(dic, projson)
                 # Assuming 'assigned_to' is a username, find or create the User object
                 member = next((m for m in dic["members"] if m == assigned_to), None)
                 if not member:
@@ -123,12 +121,12 @@ class Project:
         # Create a new User object and add to members list
         member = User(username, None)  # Replace None with actual password if available
         # self.members.append(member)
-        dic = load_data()
+        dic = load_data(projson)
         dic["members"].append(member)
-        save_data(dic)#dfghjkjhgfdfghj
+        save_data(dic, taskjson)#dfghjkjhgfdfghj
         
     def view_members(self):
-        dic = load_data()
+        dic = load_data(projson)
         if len(dic["members"]) == 0:
             print("No users yet\n")
         else:
@@ -221,48 +219,70 @@ def display_user_page(user):
                 if not user.username in dic.keys():
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
                 else:
-                    table = Table(title="Your Projects")
-                    table.add_column("Name", style="cyan", no_wrap=True)
-                    table.add_column("Members", style="magenta")
-                    for i in dic:
-                        if i==user.username:
-                            for j in range(len(dic[i])):
-                                table.add_row(f"{dic[i][j]}", "r")
-                    console.print(table)
-                    ch = Prompt.ask("\n1.View Tasks \n2.Assigne tasks\n3. Exit\n")
-                    if ch=='1':
-                        project = Prompt.ask("Enter your projects name you want:\n")
-                        if project in dic[user.username]:
-                            dicc = add_task()
-                            print(dicc)
-                            if project in dicc:
-                            #view tasks are in
-                                tabl = Table(title="Your Tasks")
-                                tabl.add_column("Name", style="cyan", no_wrap=True)
-                                tabl.add_column("Members", style="magenta")
-                                for i in dicc:
-                                    if i==project:
-                                        for j in range(len(dicc[i])):
-                                            table.add_row(f"{dicc[i][j]}", "r")
-                                console.print(tabl)
-                                pro = return_project(project, user.username)
+                    while True:
 
-                                option = Prompt.ask("1.add new task\n2.delete a task\n3.exit\n")
-                                if option == '1':
-                                    name = Prompt.ask("Enter the Name of the task:")
-                                    discription = Prompt.ask("what dis cription for the task you want to add:")
-                                    pro.create_task(name, discription)
-                                #new task with priority
-                                elif option == '2':
-                                    pass#deleting
+                        table = Table(title="Your Projects")
+                        table.add_column("Name", style="cyan", no_wrap=True)
+                        table.add_column("Members", style="magenta")
+                        for i in dic:
+                            if i==user.username:
+                                for j in range(len(dic[i])):
+                                    table.add_row(f"{dic[i][j]}", "r")
+                        console.print(table)
+                        ch = Prompt.ask("\n1.View Tasks \n2.Assigne tasks\n3. Exit\n")
+                        if ch=='1':
+                            project = Prompt.ask("Enter your projects name you want:\n")
+                            if project in dic[user.username]:
+                                dicc = add_task()
+                                print(dic,dicc)
+                                if project in dicc.keys():
+                                #view tasks are in
+                                    while True:
+
+                                        tabl = Table(title="Your Tasks")
+                                        tabl.add_column("Name", style="cyan", no_wrap=True)
+                                        tabl.add_column("Members", style="magenta")
+                                        for i in dicc:
+                                            if i==project:
+                                                for j in range(len(dicc[i])):
+                                                    tabl.add_row(f"{dicc[i][j]}", "r")
+                                        console.print(tabl)
+                                        pro = return_project(project, user.username)
+                                        option = Prompt.ask("1.add new task\n2.delete a task\n3.exit\n")
+                                        if option == '1':
+                                            name = Prompt.ask("Enter the Name of the task:")
+                                            discription = Prompt.ask("what dis cription for the task you want to add:")
+                                            pro.create_task(name, discription)
+                                        #new task with priority
+                                        elif option == '2':
+                                            pass#deleting
+                                        elif option == '3':
+                                            break
+                                        else:
+                                            console.print("[bold red]invalid choice[/bold red]\n")
+                                        
                                 else:
-                                    return
+                                    console.print("No tasks yet\n")#return??
+                                    pro = return_project(project, user.username)
+                                    option = Prompt.ask("1.add new task\n2.delete a task\n3.exit\n")
+                                    if option == '1':
+                                        name = Prompt.ask("Enter the Name of the task:")
+                                        discription = Prompt.ask("what dis cription for the task you want to add:")
+                                        pro.create_task(name, discription)
+                                    #new task with priority
+                                    elif option == '2':
+                                        pass#deleting
+                                    else:
+                                        break
+
                             else:
-                                console.print("No tasks yet\n")#return??
+                                console.print("[bold red]No such a project[/bold red]\n")#return??
+                        elif ch == '2':
+                            option = Prompt.ask("Enter name of a member")#and check meber and task and check task and add to a file 
+                        elif ch == '3':
+                            break
                         else:
-                            console.print("[bold red]No such a project[/bold red]\n")#return??
-                    elif ch == '2':
-                        option = Prompt.ask("Enter name of a member")#and check meber and task and check task and add to a file 
+                            console.print("[bold yellow]Invalid choice[/bold yellow]\n")
             elif choice == "3":
                 username_to_view = Prompt.ask("Enter username of the user you want to view:")
                 console.print(f"[bold blue]Viewing profile of user: {username_to_view}[/bold blue]")
