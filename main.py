@@ -10,6 +10,7 @@ from enum import Enum, auto
 import json
 import time
 import manager
+import re
 
 file = "tasks.json"
 projects_by_user = {}
@@ -155,8 +156,10 @@ def create_acc():
             f.write("T")
             f.write(" \n")
         with open("manage.txt", "a") as file:
+            file.write("Tedad_Vorood_Movaffaq ")
             file.write(email)
             file.write(" \n")
+            
         return User(username, password)
     else:
         console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
@@ -183,15 +186,45 @@ def tedad_vorood(word, file_path):
 
         if number_start == number_end:  # No number found after the word
             number = 1
-            new_content = content[:number_start] + " 1" + content[number_end:]
+            new_content =  content[:number_start] + " 1" + content[number_end:]
         else:
             number = int(content[number_start:number_end]) + 1
             new_content = content[:number_start] + str(number) + content[number_end:]
         
         # Move the file cursor to the beginning and write the new content
         file.seek(0)
+        
         file.write(new_content)
         file.truncate()
+
+def increment_number_in_file(name, filepath):
+    # Read the file and store its lines
+    with open(filepath, 'r') as file:
+        lines = file.readlines()
+
+    # Iterate through the lines to find the name and increment the last number
+    for i in range(len(lines)):
+        if name in lines[i]:
+            # Split the line by spaces
+            parts = lines[i].split()
+            # Check if the line has at least two parts (name and a number)
+            if len(parts) >= 2:
+                try:
+                    # Find the last number in the line
+                    last_number = int(parts[-1])
+                    # Increment the last number
+                    parts[-1] = str(last_number + 1)
+                    # Join the parts back together
+                    lines[i] = ' '.join(parts) + '\n'
+                except ValueError:
+                    # If the last part cannot be converted to an integer, skip this line
+                    pass
+
+    # Write the modified lines back to the file
+    with open(filepath, 'w') as file:
+        file.writelines(lines)
+
+
 
 def login_acc(username, password):
     return User(username, password)
@@ -274,6 +307,21 @@ def display_user_page(user):
                 break
             else:
                 console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
+def Namovvafaq(filename, target_word):
+    try:
+        with open(filename, "r") as file:
+            lines = file.readlines()
+        
+        with open(filename, "w") as file:
+            for line in lines:
+                if target_word in line and "vorood_Na_Movaffaq" not in line:
+                    line = line.strip() + " vorood_Na_Movaffaq\n"
+                file.write(line)
+      
+    except FileNotFoundError:
+        print(f"File '{filename}' not found.")
+
+# Example usage:
 
 def hashh(password):
     p = hashlib.sha256(password.encode("utf-8")).digest()
@@ -301,10 +349,12 @@ def main():
                
             elif check_pass(nam, hashh(ramz), "manba.txt"):
                 tedad_vorood(nam , "manage.txt")
+                Namovvafaq("manage.txt" ,nam)
                 console.print("[bold green]log in sucsusfully![/bold green]\n")
                 user = login_acc(nam, ramz)
                 display_user_page(user) 
-            elif not check_pass(nam, ramz, "manba.txt"):
+            elif not check_pass(nam, ramz, "manba.txt"):# and login(nam):
+                increment_number_in_file(nam ,"manage.txt")
                 x+=1
                 console.print(f"[bold red]Wrong username, email or password!![/bold red]\n[yellow]attemp {x} of 4[/yellow]\n")
                 if x == 4:
