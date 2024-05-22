@@ -16,8 +16,10 @@ logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s
 
 taskjson = "tasks.json"
 projson = "projects.json"
+members = 'members.json'
 projects_by_user = {}
 task_by_user = {}
+memberdic = {}
 
 def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -36,6 +38,7 @@ def add_project():
         return projects_by_user
     except Exception as e:
         logging.error(f'Error in add_project function: {e}', exc_info=True)
+        
 def add_task():
     with open('tasks.txt', 'r') as file:
         for line in file:
@@ -67,6 +70,19 @@ def delete_task(task_name_to_delete):
     return task_by_user
     
     
+def add_members():
+    with open('members.txt', 'r') as file:
+        for line in file:
+            project_name, member_name = line.strip().split(' ')  
+            if project_name in memberdic:
+                if member_name not in memberdic[project_name]:
+                    memberdic[project_name].append(member_name)
+            else:
+                memberdic[project_name] = [member_name]
+    save_data(memberdic, members)
+    return memberdic
+
+    
 class Task:
     def __init__(self, title, description, assigned_to):
         self.title = title
@@ -86,14 +102,17 @@ class Status(Enum):
     DONE = auto()
     ARCHIVED = auto()
 
-def load_data(files):
-    try:
-        with open(files, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {
-            "tasks":[],
-        }
+# def load_data(files):
+#     try:
+#         with open(files, 'r') as f:
+#             return json.load(f)
+#     except FileNotFoundError:
+#         return {
+#             "tasks":[],
+#             "members":[],
+#             "taskassigne":[]
+            
+#         }
 
 def save_data(data_dic, files):
     with open(files, 'w') as json_file:
@@ -105,11 +124,6 @@ class Project:
         self.creator = creator
 
     def create_task(self, title, description):
-        task = Task(title, description, None)
-        # dic = load_data()
-        # dic["tasks"].append(task.title)
-        # dic["taskdiscription"].append(task.description)
-        # save_data(dic)#fghjklkjhghjkl;
         with open("tasks.txt", 'a') as f:
             f.write(self.title)
             f.write(' ')
@@ -120,47 +134,41 @@ class Project:
             add_task()
 
     def assign_task(self, title, assigned_to):
-        dic = load_data(projson)
-        for task in dic["tasks"]:
-            if task == title:
-                dic["taskassigne"].append(assigned_to)
-                save_data(dic, projson)
-                # Assuming 'assigned_to' is a username, find or create the User object
-                member = next((m for m in dic["members"] if m == assigned_to), None)
-                if not member:
-                    member = User(assigned_to, None)  # Replace None with actual password if available
-                    # self.members.append(member)
-                return True
-        return False#dtylk;kljghk
+        # dic = load_data(projson)
+        # for task in dic["tasks"]:
+        #     if task == title:
+        #         dic["taskassigne"].append(assigned_to)
+        #         save_data(dic, projson)
+        #         # Assuming 'assigned_to' is a username, find or create the User object
+        #         member = next((m for m in dic["members"] if m == assigned_to), None)
+        #         if not member:
+        #             member = User(assigned_to, None)  # Replace None with actual password if available
+        #             # self.members.append(member)
+        #         return True
+        # return False#dtylk;kljghk
+        pass
 
-    def modify_task(self, title=None, description=None, assigned_to=None):
-        for task in self.tasks:
-            if task.title == title:
-                if description:
-                    task.description = description
-                if assigned_to:
-                    task.assigned_to = assigned_to
-                return True
-        return False
+    # def modify_task(self, title=None, description=None, assigned_to=None):
+    #     for task in self.tasks:
+    #         if task.title == title:
+    #             if description:
+    #                 task.description = description
+    #             if assigned_to:
+    #                 task.assigned_to = assigned_to
+    #             return True
+    #     return False
 
     def add_member(self, username):
-        # Create a new User object and add to members list
-        member = User(username, None)  # Replace None with actual password if available
-        # self.members.append(member)
-        dic = load_data(projson)
-        dic["members"].append(member)
-        save_data(dic, taskjson)#dfghjkjhgfdfghj
+        with open("members.txt", 'a') as f:
+            f.write(self.title)
+            f.write(' ')
+            f.write(username)
+            f.write('\n')
+            add_members()
         
-    def view_members(self):
-        dic = load_data(projson)
-        if len(dic["members"]) == 0:
-            print("No users yet\n")
-        else:
-            for member in dic["members"]:
-                print(f"\nMembers:\n{member.username}\n")
-
 def return_project(title, creator):
     return Project(title,creator)
+
 class User:
     def __init__(self, username, password):
         self.username = username
@@ -288,6 +296,7 @@ def display_user_page(user):
             elif choice == "2":
                 clear_console()
                 dic = add_project()
+                dicm = add_members()
                 if not user.username in dic.keys():
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
                 else:
@@ -299,9 +308,12 @@ def display_user_page(user):
                         for i in dic:
                             if i==user.username:
                                 for j in range(len(dic[i])):
-                                    table.add_row(f"{dic[i][j]}", "r")
+                                    if dic[i][j] in dicm:
+                                        table.add_row(f"{dic[i][j]}", f"{dicm[dic[i][j]]}")
+                                    else:
+                                        table.add_row(f"{dic[i][j]}", "No members yet")
                         console.print(table)
-                        ch = Prompt.ask("\n1.View Tasks \n2.Assigne tasks\n3. Exit\n")
+                        ch = Prompt.ask("\n1.View Tasks \n2.Assigne tasks\n3.Exit\n4.add members/view members \n")
                         if ch=='1':
                             clear_console()
                             project = Prompt.ask("Enter your projects name you want:\n")
@@ -346,7 +358,7 @@ def display_user_page(user):
                                         else:
                                             clear_console()
                                             console.print("[bold red]invalid choice[/bold red]\n")
-
+                                            
                                 else:
                                     clear_console()
                                     console.print("No tasks yet\n")#return??
@@ -380,12 +392,37 @@ def display_user_page(user):
                         elif ch == '2':
                             clear_console()
                             option = Prompt.ask("Enter name of a member")#and check meber and task and check task and add to a file 
+                            
                         elif ch == '3':
                             clear_console()
                             break
+                        elif ch=='4':
+                            clear_console()
+                            
+                            project = Prompt.ask("the name of the project")
+                            if project in dic[user.username]:
+                                member = Prompt.ask("Enter username or a email of the one you want to add to your project:")
+                                pro = return_project(project, user.username)
+                                
+                                with open('manba.txt', 'r') as file:
+                                    a=0 #counter for adding member once                                 
+                                    for line in file:
+                                        if member in line and a==0:
+                                            pro.add_member(member)
+                                            pro.add_member(member)#refresh
+                                            console.print('[bold green]Member added successfully![/bold green]')
+                                            a+=1
+                                        elif a>=1:
+                                            pass
+                                        else:
+                                            console.print(f'[bold red]No such a user named {member}[/bold red]\n')
+                            else:
+                                console.print("[bold red]No such a project[/bold red]\n")#return??
+
                         else:
                             clear_console()
                             console.print("[bold yellow]Invalid choice[/bold yellow]\n")
+ 
             elif choice == "3":
                 clear_console()
                 username_to_view = Prompt.ask("Enter username of the user you want to view:")
