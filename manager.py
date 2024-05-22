@@ -34,7 +34,7 @@ def activate_account(user, command):
             for line in lines:
                 elements = line.split()
                 if len(elements) >= 4:
-                    if elements[1]==user:
+                    if elements[1]==user or elements[0]==user:
                         elements[3] = 'T'  # Replace 'new_value' with the desired value
                         new_line = ' '.join(elements)
                         new_lines.append(new_line)
@@ -45,14 +45,14 @@ def activate_account(user, command):
                 file.write(f"{line}\n")
 
         print(f"Account for {user} has been activated.")
-    else:
+    elif command=="diactive":
         with open("manba.txt", 'r') as file:
             lines = file.readlines()
             new_lines = []
             for line in lines:
                 elements = line.split()
                 if len(elements) >= 4:
-                    if elements[1]==user:
+                    if elements[1]==user or elements[0]==user:
                         elements[3] = 'F'  # Replace 'new_value' with the desired value
                         new_line = ' '.join(elements)
                         new_lines.append(new_line)

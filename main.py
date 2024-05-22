@@ -10,6 +10,13 @@ from enum import Enum, auto
 import json
 import time
 import manager
+import logging
+def log_user_action(user, action):
+    try:
+        with open('user_actions.log', 'a') as log_file:
+            log_file.write(f"User '{user}' performed action: {action}\n")
+    except Exception as e:
+        logging.error(f'Error logging user action: {e}', exc_info=True)
 
 taskjson = "tasks.json"
 projson = "projects.json"
@@ -182,36 +189,36 @@ def create_acc():
     else:
         console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
         return None
-# def tedad_vorood(word, file_path):
-#     with open(file_path, 'r+') as file:
-#         content = file.read()
-#         word_start = content.find(word)
+def tedad_vorood(word, file_path):
+     with open(file_path, 'r+') as file:
+         content = file.read()
+         word_start = content.find(word)
         
-#         if word_start == -1:  # Word not found
-#             print(f"Word '{word}' not found in the file.")
-#             return
+         if word_start == -1:  # Word not found
+             print(f"Word '{word}' not found in the file.")
+             return
         
-#         number_start = word_start + len(word)  # Start index of the number
-#         while number_start < len(content) and content[number_start] == ' ':
-#             number_start += 1
+         number_start = word_start + len(word)  # Start index of the number
+         while number_start < len(content) and content[number_start] == ' ':
+             number_start += 1
         
-#         number_end = number_start
+         number_end = number_start
 
-#         # Find the end of the number
-#         while number_end < len(content) and content[number_end].isdigit():
-#             number_end += 1
+         # Find the end of the number
+         while number_end < len(content) and content[number_end].isdigit():
+             number_end += 1
 
-#         if number_start == number_end:  # No number found after the word
-#             number = 1
-#             new_content = content[:number_start] + " 1" + content[number_end:]
-#         else:
-#             number = int(content[number_start:number_end]) + 1
-#             new_content = content[:number_start] + str(number) + content[number_end:]
+         if number_start == number_end:  # No number found after the word
+             number = 1
+             new_content = content[:number_start] + " 1" + content[number_end:]
+         else:
+             number = int(content[number_start:number_end]) + 1
+             new_content = content[:number_start] + str(number) + content[number_end:]
         
-#         # Move the file cursor to the beginning and write the new content
-#         file.seek(0)
-#         file.write(new_content)
-#         file.truncate()
+         # Move the file cursor to the beginning and write the new content
+         file.seek(0)
+         file.write(new_content)
+         file.truncate()
 
 def check_admin(username , passw):
     a = 0
@@ -377,12 +384,22 @@ def main():
             clear_console()
             nam= Prompt.ask("enter your email or username\n")
             ramz = Prompt.ask("Enter Your Pass:\n")
-            # if check_admin(nam , ramz ):
-            #     print("meow")
+            if check_admin(nam , ramz ):
+                a=input("\nSelect an option:\n1. managing Acc\n2. Destroying Data\n")
+                if a=="1":
+                    acc_ban=input("enter Acc that you want\n")
+                    command=input("enter your command:\n1.activate\n2. diacivate\n")
+                    manager.activate_account(acc_ban ,command)
+                if a=="2":
+                    manager.purge_data()
+                else:
+                    print("kerm nariz")
+                    break
 
             if check_pass(nam, hashh(ramz), "manba.txt"):
                 console.print("[bold green]log in sucsusfully![/bold green]\n")
                 user = login_acc(nam, ramz)
+                tedad_vorood(nam ,"manage.txt")
                 display_user_page(user) 
             elif not check_pass(nam, ramz, "manba.txt"):
                 x+=1
