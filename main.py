@@ -10,6 +10,9 @@ from enum import Enum, auto
 import json
 import time
 import manager
+import logging
+
+logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 taskjson = "tasks.json"
 projson = "projects.json"
@@ -20,17 +23,19 @@ def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
     
 def add_project():
-    with open('projects.txt', 'r') as file:
-        for line in file:
-            username, project_name = line.strip().split(' ')  
-            if username in projects_by_user:
-                if project_name not in projects_by_user[username]:
-                    projects_by_user[username].append(project_name)
-            else:
-                projects_by_user[username] = [project_name]
-    save_data(projects_by_user, projson)
-    return projects_by_user
-
+    try:
+        with open('projects.txt', 'r') as file:
+            for line in file:
+                username, project_name = line.strip().split(' ')  
+                if username in projects_by_user:
+                    if project_name not in projects_by_user[username]:
+                        projects_by_user[username].append(project_name)
+                else:
+                    projects_by_user[username] = [project_name]
+        save_data(projects_by_user, projson)
+        return projects_by_user
+    except Exception as e:
+        logging.error(f'Error in add_project function: {e}', exc_info=True)
 def add_task():
     with open('tasks.txt', 'r') as file:
         for line in file:
@@ -43,6 +48,24 @@ def add_task():
     save_data(task_by_user, taskjson)
     return task_by_user
 
+def delete_task(task_name_to_delete):
+    # Read the existing tasks from the file
+    with open('tasks.txt', 'r') as file:
+        lines = file.readlines()
+
+    updated_lines = []
+    for line in lines:
+        project_name, task_name, description = line.strip().split(' ')
+        if task_name != task_name_to_delete:
+            updated_lines.append(line)
+
+    with open('tasks.txt', 'w') as file:
+        file.writelines(updated_lines)
+
+    if task_name_to_delete in task_by_user:
+        del task_by_user[task_name_to_delete]
+    return task_by_user
+    
     
 class Task:
     def __init__(self, title, description, assigned_to):
@@ -287,7 +310,7 @@ def display_user_page(user):
                                 if project in dicc.keys():
                                 #view tasks are in
                                     while True:
-
+                                        pro = return_project(project, user.username)
                                         tabl = Table(title="Your Tasks")
                                         tabl.add_column("Name", style="cyan", no_wrap=True)
                                         tabl.add_column("Members", style="magenta")
@@ -296,24 +319,34 @@ def display_user_page(user):
                                                 for j in range(len(dicc[i])):
                                                     tabl.add_row(f"{dicc[i][j]}", "r")
                                         console.print(tabl)
-                                        pro = return_project(project, user.username)
                                         option = Prompt.ask("1.add new task\n2.delete a task\n3.exit\n")
                                         if option == '1':
                                             clear_console()
                                             name = Prompt.ask("Enter the Name of the task:")
                                             discription = Prompt.ask("what dis cription for the task you want to add:")
                                             pro.create_task(name, discription)
+                                            pro.create_task(name, discription)#refresh
+
+                                            console.print("[bold blue]Task Created successfully![/bold blue]\n")
                                         #new task with priority
                                         elif option == '2':
                                             clear_console()
-                                            pass#deleting
+                                            taskk = Prompt.ask("Name of the task you want to delete:")
+                                            for i in dicc:
+                                                if i==project:
+                                                    if taskk in dicc[i]:
+                                                        dicc[project].remove(taskk)
+                                                        delete_task(taskk)
+                                                    else:
+                                                        console.print("[bold yellow]No such a task in your project[/bold yellow]\n") 
+                                            
                                         elif option == '3':
                                             clear_console()
                                             break
                                         else:
                                             clear_console()
                                             console.print("[bold red]invalid choice[/bold red]\n")
-                                        
+
                                 else:
                                     clear_console()
                                     console.print("No tasks yet\n")#return??
@@ -324,10 +357,19 @@ def display_user_page(user):
                                         name = Prompt.ask("Enter the Name of the task:")
                                         discription = Prompt.ask("what dis cription for the task you want to add:")
                                         pro.create_task(name, discription)
+                                        pro = return_project(project, user.username)
                                     #new task with priority
                                     elif option == '2':
-                                        clear_console()
-                                        pass#deleting
+                                            clear_console()
+                                            taskk = Prompt.ask("Name of the task you want to delete:")
+                                            for i in dicc:
+                                                if i==project:
+                                                    if taskk in dicc[i]:
+                                                        dicc[project].remove(taskk)
+                                                        delete_task(taskk)
+                                                    else:
+                                                        console.print("[bold yellow]No such a task in your project[/bold yellow]\n") 
+
                                     else:
                                         clear_console()
                                         break
