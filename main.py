@@ -18,10 +18,12 @@ taskjson = "tasks.json"
 projson = "projects.json"
 members = "members.json"
 memberstask = "memberstask.json"
+descrip = "descriptionstask.json"
 projects_by_user = {}
 task_by_user = {}
 memberdic = {}
 membertaskdic = {}
+des = {}
 def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
     
@@ -68,7 +70,7 @@ def delete_project(user,project_name_to_delete):
             if project_name != project_name_to_delete:
                 updated.append(line)
     with open('tasks.txt', 'w') as f:
-        f.writelines(updated)######################
+        f.writelines(updated)
 
     with open('members.txt', 'r') as file:
         lines = file.readlines()
@@ -91,7 +93,8 @@ def delete_project(user,project_name_to_delete):
 def add_task():
     with open('tasks.txt', 'r') as file:
         for line in file:
-            project_name, task_name, description = line.strip().split(' ')  
+            project_name, task_name, *description = line.strip().split(' ', 2)
+            description = ' '.join(description)  # Join the remaining elements as description
             if project_name in task_by_user:
                 if task_name not in task_by_user[project_name]:
                     task_by_user[project_name].append(task_name)
@@ -100,6 +103,18 @@ def add_task():
     save_data(task_by_user, taskjson)
     return task_by_user
 
+def add_description():
+      # Initialize an empty dictionary to store descriptions
+    with open('tasks.txt', 'r') as file:
+        for line in file:
+            # Split the line only twice to separate project_name and task_name,
+            # and then combine the remaining elements as description
+            project_name, task_name, *description = line.strip().split(' ', 2)
+            description = ' '.join(description)  # Join the remaining elements as description
+            des[task_name] = description
+    save_data(des, descrip)  # Save the descriptions to a file
+    return des
+
 def delete_task(task_name_to_delete):
     # Read the existing tasks from the file
     with open('tasks.txt', 'r') as file:
@@ -107,7 +122,8 @@ def delete_task(task_name_to_delete):
 
     updated_lines = []
     for line in lines:
-        project_name, task_name, description = line.strip().split(' ')
+        project_name, task_name, *description = line.strip().split(' ', 2)
+        description = ' '.join(description)  # Join the remaining elements as description
         if task_name != task_name_to_delete:
             updated_lines.append(line)
 
@@ -161,14 +177,14 @@ def add_member_to_task():
     save_data(membertaskdic, memberstask)
     return membertaskdic
 
-describe = []
-def descripe(task):
-    with open('tasks.txt', 'r') as file:
-        for line in file:
-            project_name, task_name, description = line.strip().split(' ')
-            if task_name==task:
-                describe.append(description)  
-    return description#s
+# descriptionss = []
+# def descriptions(task):
+#     with open('tasks.txt', 'r') as file:
+#         for line in file:
+#             project_name, task_name, description = line.strip().split(' ')
+#             if task_name==task:
+#                 descriptionss.append(description)  
+#     return description#s
 
     
     
@@ -218,17 +234,7 @@ class Project:
             f.write(name)
             f.write('\n')
             add_member_to_task()
-        
 
-    # def modify_task(self, title=None, description=None, assigned_to=None):
-    #     for task in self.tasks:
-    #         if task.title == title:
-    #             if description:
-    #                 task.description = description
-    #             if assigned_to:
-    #                 task.assigned_to = assigned_to
-    #             return True
-    #     return False
 
     def add_member(self, username):
         with open("members.txt", 'a') as f:
@@ -400,14 +406,15 @@ def display_user_page(user):
                                         tabl.add_column("Name", style="cyan", no_wrap=True)
                                         tabl.add_column("Members Assigned", style="magenta")
                                         tabl.add_column("Description", style="magenta")
-
+                                        
                                         for i in dicc:
                                             if i==project:
                                                 for j in range(len(dicc[i])):
+                                                    des = add_description()
                                                     if i+dicc[i][j] in di:
-                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}",'')#tabel task
+                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}", f"{des[dicc[i][j]]}")#tabel task
                                                     else:
-                                                        tabl.add_row(f"{dicc[i][j]}", 'No assignment yet', '')
+                                                        tabl.add_row(f"{dicc[i][j]}", 'No assignment yet', f"{des[dicc[i][j]]}")#########changing description
                                         console.print(tabl)
                                         option = Prompt.ask("1.add new task\n2.delete task\n3.Go back\n")
                                         if option == '1':
@@ -439,7 +446,7 @@ def display_user_page(user):
                                             
                                 else:
                                     clear_console()
-                                    console.print("No tasks yet\n")#return??
+                                    console.print("No tasks yet\n")
                                     pro = return_project(project, user.username)
                                     option = Prompt.ask("1.add new task\n2.delete a task\n3.Go back\n")
                                     if option == '1':
@@ -507,7 +514,7 @@ def display_user_page(user):
                                                                 pro = return_project(option, user.username)
                                                                 pro.assign_task(taskkk, memb)
                                                             
-                                                            #pro.assign_task(taskkk, memb)#refresh??
+                                                                #pro.assign_task(taskkk, memb)#refresh??
                                 
                         elif ch == '5':
                             clear_console()
