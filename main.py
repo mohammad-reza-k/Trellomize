@@ -38,7 +38,26 @@ def add_project():
         return projects_by_user
     except Exception as e:
         logging.error(f'Error in add_project function: {e}', exc_info=True)
-        
+
+def delete_project(project_name_to_delete):
+    # Read the existing tasks from the file
+    with open('projects.txt', 'r') as file:
+        lines = file.readlines()
+
+    updated_lines = []
+    for line in lines:
+        user_name, project_name = line.strip().split(' ')
+        if project_name != project_name_to_delete:
+            updated_lines.append(line)
+
+    with open('projects.txt', 'w') as file:
+        file.writelines(updated_lines)
+
+    if project_name_to_delete in projects_by_user:
+        del task_by_user[project_name_to_delete]
+    return projects_by_user
+
+    
 def add_task():
     with open('tasks.txt', 'r') as file:
         for line in file:
@@ -195,7 +214,7 @@ def create_acc():
             f.close()
             with open("manage.txt", "a") as file:
                 file.write(email)
-                file.write(" \n")
+                file.write(" \n")#admin
 
         return User(username, password)
     else:
@@ -230,7 +249,7 @@ def tedad_vorood(word, file_path):
          # Move the file cursor to the beginning and write the new content
          file.seek(0)
          file.write(new_content)
-         file.truncate()
+         file.truncate()#admin
          
 def check_admin(username , passw):
     a = 0
@@ -239,7 +258,7 @@ def check_admin(username , passw):
         if (username and passw) in content:
             a = 1
         
-    return a
+    return a# admin
 
 def login_acc(username, password):
     return User(username, password)
@@ -280,7 +299,7 @@ def display_user_page(user):
                 clear_console()
                 title = Prompt.ask("Enter project title:")
                 user.create_project(title)
-                console.print("[bold green]Project created successfully![/bold green]")
+                console.print("[bold blue]Project created successfully![/bold blue]")
             elif choice == "2":
                 clear_console()
                 dic = add_project()
@@ -301,8 +320,8 @@ def display_user_page(user):
                                     else:
                                         table.add_row(f"{dic[i][j]}", "No members yet")
                         console.print(table)
-                        ch = Prompt.ask("\n1.View Tasks \n2.Assigne tasks\n3.add members/view members\n4.Exit \n")
-                        if ch=='1':
+                        ch = Prompt.ask("\n1.delete project \n2.View tasks\n3.Assigne tasks\n4.add members/view members\n5.Exit\n")
+                        if ch=='2':
                             clear_console()
                             project = Prompt.ask("Enter your projects name you want:\n")
                             if project in dic[user.username]:
@@ -377,14 +396,14 @@ def display_user_page(user):
                             else:
                                 clear_console()
                                 console.print("[bold red]No such a project[/bold red]\n")#return??
-                        elif ch == '2':
+                        elif ch == '3':
                             clear_console()
                             option = Prompt.ask("Enter name of a member")#and check meber and task and check task and add to a file 
                             
-                        elif ch == '4':
+                        elif ch == '5':
                             clear_console()
                             break
-                        elif ch =='3':
+                        elif ch =='4':
                             clear_console()
                             
                             project = Prompt.ask("the name of the project")
@@ -406,6 +425,16 @@ def display_user_page(user):
                                             console.print(f'[bold red]No such a user named {member}[/bold red]\n')
                             else:
                                 console.print("[bold red]No such a project[/bold red]\n")#return??
+                        elif ch == '1':
+                            clear_console()
+                            proro = Prompt.ask("Name of the project you want to delete:")
+                            for i in dic:
+                                if i==user.username:
+                                    if proro in dic[i]:
+                                        dic[user.username].remove(proro)
+                                        delete_project(proro)
+                                    else:
+                                        console.print("[bold yellow]No such a project[/bold yellow]\n") 
 
                         else:
                             clear_console()
