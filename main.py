@@ -62,7 +62,7 @@ def delete_project(project_name_to_delete):
 def add_task():
     with open('tasks.txt', 'r') as file:
         for line in file:
-            project_name, task_name, discription = line.strip().split(' ')  
+            project_name, task_name, description = line.strip().split(' ')  
             if project_name in task_by_user:
                 if task_name not in task_by_user[project_name]:
                     task_by_user[project_name].append(task_name)
@@ -131,6 +131,16 @@ def add_member_to_task():
     save_data(membertaskdic, memberstask)
     return membertaskdic
 
+describe = []
+def descripe(task):
+    with open('tasks.txt', 'r') as file:
+        for line in file:
+            project_name, task_name, description = line.strip().split(' ')
+            if task_name==task:
+                describe.append(description)  
+    return description#s
+
+    
     
 def save_data(data_dic, files):
     with open(files, 'w') as json_file:
@@ -341,7 +351,7 @@ def display_user_page(user):
                             if i==user.username:
                                 for j in range(len(dic[i])):
                                     if dic[i][j] in dicm:
-                                        table.add_row(f"{dic[i][j]}", f"{dicm[dic[i][j]]}")####################################
+                                        table.add_row(f"{dic[i][j]}", f"{dicm[dic[i][j]]}")#table project
                                     else:
                                         table.add_row(f"{dic[i][j]}", "No members yet")
                         console.print(table)
@@ -358,23 +368,24 @@ def display_user_page(user):
                                         pro = return_project(project, user.username)
                                         tabl = Table(title="Your Tasks")
                                         tabl.add_column("Name", style="cyan", no_wrap=True)
-                                        tabl.add_column("Members", style="magenta")
-                                        print(dicc)
+                                        tabl.add_column("Members Assigned", style="magenta")
+                                        tabl.add_column("Description", style="magenta")
+
                                         for i in dicc:
                                             if i==project:
                                                 for j in range(len(dicc[i])):
                                                     if i+dicc[i][j] in di:
-                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}")##############################################
+                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}",'')#tabel task
                                                     else:
-                                                        tabl.add_row(f"{dicc[i][j]}", 'No assignment yet')
+                                                        tabl.add_row(f"{dicc[i][j]}", 'No assignment yet', '')
                                         console.print(tabl)
                                         option = Prompt.ask("1.add new task\n2.delete task\n3.Go back\n")
                                         if option == '1':
                                             clear_console()
                                             name = Prompt.ask("Enter the Name of the task:")
-                                            discription = Prompt.ask("what dis cription for the task you want to add:")
-                                            pro.create_task(name, discription)
-                                            pro.create_task(name, discription)#refresh
+                                            description = Prompt.ask("what description for the task you want to add:")
+                                            pro.create_task(name, description)
+                                            pro.create_task(name, description)#refresh
 
                                             console.print("[bold blue]Task Created successfully![/bold blue]\n")
                                         #new task with priority
@@ -404,7 +415,7 @@ def display_user_page(user):
                                     if option == '1':
                                         clear_console()
                                         name = Prompt.ask("Enter the Name of the task:")
-                                        discription = Prompt.ask("what dis cription for the task you want to add:")
+                                        discription = Prompt.ask("what description for the task you want to add:")
                                         pro.create_task(name, discription)
                                         pro = return_project(project, user.username)
                                     #new task with priority
@@ -425,7 +436,7 @@ def display_user_page(user):
 
                             else:
                                 clear_console()
-                                console.print("[bold red]No such a project[/bold red]\n")#return??
+                                console.print("[bold red]No such a project[/bold red]\n")
                         elif ch == '3':
                             clear_console()
                             option = Prompt.ask("Enter name of a project")#and check meber and task and check task and add to a file 
@@ -434,33 +445,37 @@ def display_user_page(user):
                             dicc = add_task()
                             for i in dic[user.username]:
                                 if i != option:
-                                    console.print(f"[bold red]No such a project named '{option}'[/bold red]\n")#return??
+                                    console.print(f"[bold red]No such a project named '{option}'[/bold red]\n")
                                 else:
                                     if not option in dicc:
-                                        console.print(f"[bold red]No tasks in '{option}'[/bold red]\n")#retur??
+                                        console.print(f"[bold red]No tasks in '{option}'[/bold red]\n")
                                     else:
                                         for j in dicc[option]:
                                             if j != taskkk:
-                                                console.print(f"[bold red]No such a task named '{taskkk}'[/bold red]\n")#retur??
+                                                console.print(f"[bold red]No such a task named '{taskkk}'[/bold red]\n")
                                             else:
                                                 dicm = add_members()
-                                                if len(dicm[option])==0:
+                                                if not option in dicm:
                                                    console.print(f"[bold red]No members in '{option}'[/bold red]\n") 
                                                 elif not memb in dicm[option]:
                                                     console.print(f"[bold red]No member named '{memb}' in project '{option}'[/bold red]\n") 
                                                 else:
                                                     di = add_member_to_task()
-                                                    if not option+taskkk in di:
-                                                        console.print("[bold red]No members assigned[/bold red]")
+                                                    if len(di)==0:
+                                                        pro = return_project(option, user.username)
+                                                        pro.assign_task(taskkk, memb)
                                                     else:
-                                                        a=0 #couter for adding
-                                                        for z in di[option+taskkk]:
-                                                            if z == memb and a==0:
-                                                                console.print(f"[bold yellow]user {memb} is already in project '{option}' and task '{taskkk}'[/bold yellow]")#return??
-                                                                a=1
-                                                        if a==0:
-                                                            pro = return_project(option, user.username)
-                                                            pro.assign_task(taskkk, memb)
+                                                        if not option+taskkk in di:
+                                                            console.print("[bold red]No members assigned[/bold red]")
+                                                        else:
+                                                            a=0 #couter for adding
+                                                            for z in di[option+taskkk]:
+                                                                if z == memb and a==0:
+                                                                    console.print(f"[bold yellow]user {memb} is already in project '{option}' and task '{taskkk}'[/bold yellow]")#return??
+                                                                    a=1
+                                                            if a==0:
+                                                                pro = return_project(option, user.username)
+                                                                pro.assign_task(taskkk, memb)
                                                             
                                                             #pro.assign_task(taskkk, memb)#refresh??
                                 
@@ -478,14 +493,25 @@ def display_user_page(user):
                                 a=0 #counter for adding member onc
                                 with open('manba.txt', 'r') as file:                                
                                     for line in file:
-                                        if member in d[project] and a==0:
-                                            console.print(f"[bold yellow]user '{member}' is already in teh project[/bold yellow]")
-                                            a=1
-                                        elif member in line and a==0:
-                                            pro.add_member(member)
-                                            pro.add_member(member)#refresh
-                                            console.print('[bold green]Member added successfully![/bold green]')
-                                            a=1
+                                        if len(d)==0:
+                                            if member in line and a==0:
+                                                pro.add_member(member)
+                                                pro.add_member(member)#refresh
+                                                console.print('[bold green]Member added successfully![/bold green]')
+                                                a=1
+
+                                        else:
+                                            if not project in d:
+                                                console.print("no project named")
+                                            else:
+                                                if member in d[project] and a==0:
+                                                    console.print(f"[bold yellow]user '{member}' is already in teh project[/bold yellow]")
+                                                    a=1
+                                                if member in line and a==0:
+                                                    pro.add_member(member)
+                                                    pro.add_member(member)#refresh
+                                                    console.print('[bold green]Member added successfully![/bold green]')
+                                                    a=1
                                     if a==0:
                                         console.print(f"[bold red]No user account named {member} found[/bold red]")      
                                 
