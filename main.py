@@ -82,12 +82,9 @@ def add_members():
     save_data(memberdic, members)
     return memberdic
 
-    
-class Task:
-    def __init__(self, title, description, assigned_to):
-        self.title = title
-        self.description = description
-        self.assigned_to = assigned_to
+def save_data(data_dic, files):
+    with open(files, 'w') as json_file:
+        json.dump(data_dic, json_file, indent=4)
 
 class Priority(Enum):
     CRITICAL = auto()
@@ -102,21 +99,12 @@ class Status(Enum):
     DONE = auto()
     ARCHIVED = auto()
 
-# def load_data(files):
-#     try:
-#         with open(files, 'r') as f:
-#             return json.load(f)
-#     except FileNotFoundError:
-#         return {
-#             "tasks":[],
-#             "members":[],
-#             "taskassigne":[]
-            
-#         }
+class Task:
+    def __init__(self, title, description, assigned_to):
+        self.title = title
+        self.description = description
+        self.assigned_to = assigned_to
 
-def save_data(data_dic, files):
-    with open(files, 'w') as json_file:
-        json.dump(data_dic, json_file, indent=4)
 
 class Project:
     def __init__(self, title, creator):
@@ -213,37 +201,37 @@ def create_acc():
     else:
         console.print("[bold red]Invalid email, username, or password. Please try again.[/bold red]")
         return None
-# def tedad_vorood(word, file_path):
-#     with open(file_path, 'r+') as file:
-#         content = file.read()
-#         word_start = content.find(word)
+def tedad_vorood(word, file_path):
+     with open(file_path, 'r+') as file:
+         content = file.read()
+         word_start = content.find(word)
         
-#         if word_start == -1:  # Word not found
-#             print(f"Word '{word}' not found in the file.")
-#             return
+         if word_start == -1:  # Word not found
+             print(f"Word '{word}' not found in the file.")
+             return
         
-#         number_start = word_start + len(word)  # Start index of the number
-#         while number_start < len(content) and content[number_start] == ' ':
-#             number_start += 1
+         number_start = word_start + len(word)  # Start index of the number
+         while number_start < len(content) and content[number_start] == ' ':
+             number_start += 1
         
-#         number_end = number_start
+         number_end = number_start
 
-#         # Find the end of the number
-#         while number_end < len(content) and content[number_end].isdigit():
-#             number_end += 1
+         # Find the end of the number
+         while number_end < len(content) and content[number_end].isdigit():
+             number_end += 1
 
-#         if number_start == number_end:  # No number found after the word
-#             number = 1
-#             new_content = content[:number_start] + " 1" + content[number_end:]
-#         else:
-#             number = int(content[number_start:number_end]) + 1
-#             new_content = content[:number_start] + str(number) + content[number_end:]
+         if number_start == number_end:  # No number found after the word
+             number = 1
+             new_content = content[:number_start] + " 1" + content[number_end:]
+         else:
+             number = int(content[number_start:number_end]) + 1
+             new_content = content[:number_start] + str(number) + content[number_end:]
         
-#         # Move the file cursor to the beginning and write the new content
-#         file.seek(0)
-#         file.write(new_content)
-#         file.truncate()
-
+         # Move the file cursor to the beginning and write the new content
+         file.seek(0)
+         file.write(new_content)
+         file.truncate()
+         
 def check_admin(username , passw):
     a = 0
     with open ("adminfile.txt" , "r") as file:
@@ -313,7 +301,7 @@ def display_user_page(user):
                                     else:
                                         table.add_row(f"{dic[i][j]}", "No members yet")
                         console.print(table)
-                        ch = Prompt.ask("\n1.View Tasks \n2.Assigne tasks\n3.Exit\n4.add members/view members \n")
+                        ch = Prompt.ask("\n1.View Tasks \n2.Assigne tasks\n3.add members/view members\n4.Exit \n")
                         if ch=='1':
                             clear_console()
                             project = Prompt.ask("Enter your projects name you want:\n")
@@ -331,7 +319,7 @@ def display_user_page(user):
                                                 for j in range(len(dicc[i])):
                                                     tabl.add_row(f"{dicc[i][j]}", "r")
                                         console.print(tabl)
-                                        option = Prompt.ask("1.add new task\n2.delete a task\n3.exit\n")
+                                        option = Prompt.ask("1.add new task\n2.delete task\n3.exit\n")
                                         if option == '1':
                                             clear_console()
                                             name = Prompt.ask("Enter the Name of the task:")
@@ -393,10 +381,10 @@ def display_user_page(user):
                             clear_console()
                             option = Prompt.ask("Enter name of a member")#and check meber and task and check task and add to a file 
                             
-                        elif ch == '3':
+                        elif ch == '4':
                             clear_console()
                             break
-                        elif ch=='4':
+                        elif ch =='3':
                             clear_console()
                             
                             project = Prompt.ask("the name of the project")
