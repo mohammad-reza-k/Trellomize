@@ -12,28 +12,29 @@ import json
 import time
 import manager
 import logging
-
+def today_date():
+    return datetime.today().date()
 def time():
     return datetime.now().time()
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 def log_file_operation(operation, file_path):
     try:
         with open(file_path, 'a') as log_file:
-            log_file.write(f"{operation} operation performed on file: {file_path}\n")
+            log_file.write(f"{operation} operation performed on file: {file_path} in {time()} in {today_date()}\n")
     except Exception as e:
         logging.error(f'Error logging file operation: {e}', exc_info=True)
 
 def log_user_action(user, action):
     try:
         with open('user_actions.log', 'a') as log_file:
-            log_file.write(f"User '{user}' performed action: Added {action} in {time()} \n")
+            log_file.write(f"User '{user}' performed action: Added {action} in {time()} in {today_date()} \n")
     except Exception as e:
         logging.error(f'Error logging user action: {e}', exc_info=True)
 
 def log_system_event(event):
     try:
         with open('system_events.log', 'a') as log_file:
-            log_file.write(f"System event: {event} in {time()} \n")
+            log_file.write(f"System event: {event} in {time()} in {today_date()} \n")
     except Exception as e:
         logging.error(f'Error logging system event: {e}', exc_info=True)
 
