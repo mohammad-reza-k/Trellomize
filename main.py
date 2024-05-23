@@ -11,6 +11,7 @@ import json
 import time
 import manager
 import logging
+from datetime import datetime, timedelta
 
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -177,17 +178,7 @@ def add_member_to_task():
     save_data(membertaskdic, memberstask)
     return membertaskdic
 
-# descriptionss = []
-# def descriptions(task):
-#     with open('tasks.txt', 'r') as file:
-#         for line in file:
-#             project_name, task_name, description = line.strip().split(' ')
-#             if task_name==task:
-#                 descriptionss.append(description)  
-#     return description#s
-
-    
-    
+   
 def save_data(data_dic, files):
     with open(files, 'w') as json_file:
         json.dump(data_dic, json_file, indent=4)
@@ -206,46 +197,42 @@ class Status(Enum):
     ARCHIVED = auto()
 
 class Task:
-    def __init__(self, title, description, assigned_to):
+    def __init__(self, title, description, assigned_to, priority, status):
         self.title = title
         self.description = description
         self.assigned_to = assigned_to
-
+        self.priority = priority
+        self.status = status
 
 class Project:
     def __init__(self, title, creator):
         self.title = title
         self.creator = creator
 
-    def create_task(self, title, description):
+    def create_task(self, title, description, priority, status):
         with open("tasks.txt", 'a') as f:
-            f.write(self.title)
-            f.write(' ')
-            f.write(title)
-            f.write(' ')
-            f.write(description)
-            f.write('\n')
+            f.write(f"{self.title} {title} {description}\n")
             add_task()
+        current_time = datetime.now()
+        end_time = current_time + timedelta(hours=24)
+        with open("time.txt", 'a') as f:
+            f.write(f"{self.title} {title} {current_time} {end_time}\n")
+
+        with open("task_details.txt", 'a') as f:
+            f.write(f"{self.title} {title} {priority.name} {status.name}\n")
 
     def assign_task(self, assigned_to_task, name):
         with open('memberstask.txt', 'a') as f:
-            f.write(self.title+assigned_to_task)
-            f.write(' ')
-            f.write(name)
-            f.write('\n')
+            f.write(f"{self.title}{assigned_to_task} {name}\n")
             add_member_to_task()
-
 
     def add_member(self, username):
         with open("members.txt", 'a') as f:
-            f.write(self.title)
-            f.write(' ')
-            f.write(username)
-            f.write('\n')
+            f.write(f"{self.title} {username}\n")
             add_members()
-        
+
 def return_project(title, creator):
-    return Project(title,creator)
+    return Project(title, creator)
 
 class User:
     def __init__(self, username, password):
@@ -254,12 +241,8 @@ class User:
         self.is_activate = True
 
     def create_project(self, title):
-        project = Project(title, self.username)
         with open("projects.txt", 'a') as f:
-            f.write(self.username) 
-            f.write(" ")
-            f.write(title)
-            f.write("\n") 
+            f.write(f"{self.username} {title}\n") 
             f.close()
             add_project()
         
@@ -274,14 +257,7 @@ def create_acc():
     if email.endswith(".com") and '@' in email and len(password) >= 5:
         console.print("[bold green]Login successful![/bold green]")
         with open("manba.txt","a") as f:
-            f.write(email) 
-            f.write(" ")
-            f.write(username)
-            f.write(" ")
-            f.write(hashh(password))
-            f.write(" ")
-            f.write("T")
-            f.write("\n") 
+            f.write(f"{email} {username} {hashh(password)} T\n") 
             f.close()
             with open("manage.txt", "a") as file:
                 file.write(email)
@@ -421,8 +397,23 @@ def display_user_page(user):
                                             clear_console()
                                             name = Prompt.ask("Enter the Name of the task:")
                                             description = Prompt.ask("what description for the task you want to add:")
-                                            pro.create_task(name, description)
-                                            pro.create_task(name, description)#refresh
+                                            priority = Prompt.ask("Enter the priority (m for medium, c for critical, h for high, nothing for low)")
+                                            if priority == 'm':
+                                                pro.create_task(name, description, Priority.MEDIUM, Status.BACKLOG)
+                                                pro.create_task(name, description, Priority.MEDIUM, Status.BACKLOG)#refresh
+
+                                            elif priority == 'c':
+                                                pro.create_task(name, description, Priority.CRITICAL, Status.BACKLOG)
+                                                pro.create_task(name, description, Priority.CRITICAL, Status.BACKLOG)#refresh
+
+                                            elif priority == 'h':
+                                                pro.create_task(name, description, Priority.HIGH, Status.BACKLOG)
+                                                pro.create_task(name, description, Priority.HIGH, Status.BACKLOG)#refresh
+
+                                            else:
+                                                pro.create_task(name, description, Priority.LOW, Status.BACKLOG)
+                                                pro.create_task(name, description, Priority.LOW, Status.BACKLOG)#refresh
+
 
                                             console.print("[bold blue]Task Created successfully![/bold blue]\n")
                                         #new task with priority
@@ -446,14 +437,14 @@ def display_user_page(user):
                                             
                                 else:
                                     clear_console()
-                                    console.print("No tasks yet\n")
+                                    console.print("[bold yellow]No tasks yet[/bold yellow]\n")
                                     pro = return_project(project, user.username)
                                     option = Prompt.ask("1.add new task\n2.delete a task\n3.Go back\n")
                                     if option == '1':
                                         clear_console()
                                         name = Prompt.ask("Enter the Name of the task:")
                                         discription = Prompt.ask("what description for the task you want to add:")
-                                        pro.create_task(name, discription)
+                                        pro.create_task(name, discription, Priority.LOW, Status.BACKLOG)
                                         pro = return_project(project, user.username)
                                     #new task with priority
                                     elif option == '2':
@@ -500,7 +491,7 @@ def display_user_page(user):
                                                     di = add_member_to_task()
                                                     if len(di)==0:
                                                         pro = return_project(option, user.username)
-                                                        pro.assign_task(taskkk, memb)
+                                                        pro.assign_task(taskkk, memb, 'low')
                                                     else:
                                                         if not option+taskkk in di:
                                                             console.print("[bold red]No members assigned[/bold red]")
@@ -512,7 +503,7 @@ def display_user_page(user):
                                                                     a=1
                                                             if a==0:
                                                                 pro = return_project(option, user.username)
-                                                                pro.assign_task(taskkk, memb)
+                                                                pro.assign_task(taskkk, memb, 'low')
                                                             
                                                                 #pro.assign_task(taskkk, memb)#refresh??
                                 
@@ -530,27 +521,28 @@ def display_user_page(user):
                                 a=0 #counter for adding member onc
                                 with open('manba.txt', 'r') as file:                                
                                     for line in file:
+                                        email, nam,ram, t=line.strip().split(' ') 
                                         if len(d)==0:
-                                            if member in line and a==0:
+                                            if (member==email or member==nam) and a==0:
                                                 pro.add_member(member)
                                                 pro.add_member(member)#refresh
                                                 console.print('[bold green]Member added successfully![/bold green]')
                                                 a=1
 
                                         else:
-                                            if not project in d:
-                                                console.print("no project named")
-                                            else:
-                                                if member in d[project] and a==0:
-                                                    console.print(f"[bold yellow]user '{member}' is already in teh project[/bold yellow]")
-                                                    a=1
-                                                if member in line and a==0:
-                                                    pro.add_member(member)
-                                                    pro.add_member(member)#refresh
-                                                    console.print('[bold green]Member added successfully![/bold green]')
-                                                    a=1
+                                            if project in d and member in d[project]:
+                                                a=2
+                                            elif (member==email or member==nam) and a==0:
+                                                pro.add_member(member)
+                                                pro.add_member(member)#refresh
+                                                console.print('[bold green]Member added successfully![/bold green]')
+                                                a=1
+                                                break
+
                                     if a==0:
-                                        console.print(f"[bold red]No user account named {member} found[/bold red]")      
+                                        console.print(f"[bold red]No user account named '{member}' found[/bold red]")      
+                                    if a==2:
+                                        console.print(f"[bold yellow]user '{member}' is already in the project[/bold yellow]")
                                 
                             else:
                                 console.print("[bold red]No such a project[/bold red]\n")#return??
