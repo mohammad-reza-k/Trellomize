@@ -40,7 +40,7 @@ def add_project():
     except Exception as e:
         logging.error(f'Error in add_project function: {e}', exc_info=True)
 
-def delete_project(project_name_to_delete):
+def delete_project(user,project_name_to_delete):
     # Read the existing tasks from the file
     with open('projects.txt', 'r') as file:
         lines = file.readlines()
@@ -50,12 +50,41 @@ def delete_project(project_name_to_delete):
         user_name, project_name = line.strip().split(' ')
         if project_name != project_name_to_delete:
             updated_lines.append(line)
-
     with open('projects.txt', 'w') as file:
         file.writelines(updated_lines)
-
+        
     if project_name_to_delete in projects_by_user:
         del task_by_user[project_name_to_delete]
+    save_data(task_by_user, taskjson)
+    
+    if user in projects_by_user:
+        del projects_by_user[user]
+    save_data(projects_by_user, projson)
+    updated = []
+    with open('tasks.txt', 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            project_name, task_name , di= line.strip().split(' ')
+            if project_name != project_name_to_delete:
+                updated.append(line)
+    with open('tasks.txt', 'w') as f:
+        f.writelines(updated)######################
+
+    with open('members.txt', 'r') as file:
+        lines = file.readlines()
+
+    update = []
+    for line in lines:
+        project_name, member_name = line.strip().split(' ')
+        if project_name != project_name_to_delete:
+            update.append(line)
+    with open('members.txt', 'w') as file:
+        file.writelines(updated_lines)
+        
+    if project_name_to_delete in memberdic:
+        del memberdic[project_name_to_delete]
+    save_data(memberdic, members)
+
     return projects_by_user
 
     
@@ -87,6 +116,7 @@ def delete_task(task_name_to_delete):
 
     if task_name_to_delete in task_by_user:
         del task_by_user[task_name_to_delete]
+    save_data(task_by_user, taskjson)
     return task_by_user
     
     
@@ -355,7 +385,7 @@ def display_user_page(user):
                                     else:
                                         table.add_row(f"{dic[i][j]}", "No members yet")
                         console.print(table)
-                        ch = Prompt.ask("\n1.delete project \n2.View tasks\n3.Assigne tasks\n4.add members/view members\n5.Go back\n")
+                        ch = Prompt.ask("\n1.delete project \n2.View tasks\n3.Assigne tasks\n4.add members/view members\n5.Go back and refresh\n")
                         if ch=='2':
                             clear_console()
                             project = Prompt.ask("Enter your projects name you want:\n")
@@ -524,7 +554,8 @@ def display_user_page(user):
                                 if i==user.username:
                                     if proro in dic[i]:
                                         dic[user.username].remove(proro)
-                                        delete_project(proro)
+                                        delete_project(user.username,proro)
+                                        break
                                     else:
                                         console.print("[bold yellow]No such a project[/bold yellow]\n") 
 
