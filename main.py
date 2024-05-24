@@ -149,7 +149,7 @@ def add_task():
                     task_by_user[project_name] = [task_name]
         save_data(task_by_user, taskjson)
         log_system_event(task_name)
-        log_user_action(user_name, task_name)
+        log_user_action("user_name", task_name)
         return task_by_user
     except Exception as e:
         logging.error(f'Error adding task: {e}', exc_info=True)
@@ -678,17 +678,20 @@ def main():
             clear_console()
             nam= Prompt.ask("enter your email or username\n")
             ramz = Prompt.ask("Enter Your Pass:\n")
-            if check_admin(nam , ramz ):
-                a=input("\nSelect an option:\n1. managing Acc\n2. Destroying Data\n")
-                if a=="1":
-                    acc_ban=input("enter Acc that you want\n")
-                    command=input("enter your command:\n1.activate\n2. diacivate\n")
-                    manager.activate_account(acc_ban ,command)
-                if a=="2":
-                    manager.purge_data()
-                else:
-                    print("kerm nariz")
-                    break
+            if check_admin(nam , ramz):
+                try:    
+                    a = input("\nSelect an option:\n1. Managing Account\n2. Destroying Data\n")
+                    if a == "1":
+                        acc_ban = input("Enter the Account that you want:\n")
+                        command = input("Enter your command:\n1. Activate\n2. Diactivate\n")
+                        manager.activate_account(acc_ban, command)
+                    elif a == "2":
+                        manager.purge_data()
+                    else:
+                        print("Invalid option selected.")
+                except Exception as e:
+                    print("An error occurred:", e)
+
 
             if check_pass(nam, hashh(ramz), "manba.txt"):
                 console.print("[bold green]log in sucsusfully![/bold green]\n")

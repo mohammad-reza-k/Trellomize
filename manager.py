@@ -45,7 +45,7 @@ def activate_account(user, command):
                 file.write(f"{line}\n")
 
         print(f"Account for {user} has been activated.")
-    elif command=="diactive":
+    elif command=="diactivate":
         with open("manba.txt", 'r') as file:
             lines = file.readlines()
             new_lines = []
