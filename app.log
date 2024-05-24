@@ -46,3 +46,21 @@ Traceback (most recent call last):
     log_system_event(f"member '{member_name}' Added successfully")
                                 ^^^^^^^^^^^
 UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-24 19:21:44,793 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 209, in add_members
+    log_system_event(f"member '{member_name}' Added successfully")
+                                ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-24 19:21:59,300 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 209, in add_members
+    log_system_event(f"member '{member_name}' Added successfully")
+                                ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-24 19:22:18,774 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 209, in add_members
+    log_system_event(f"member '{member_name}' Added successfully")
+                                ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value

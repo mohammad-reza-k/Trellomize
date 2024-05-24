@@ -2,14 +2,19 @@ import argparse
 import os
 
 def create_admin(username, password):
+    # Check if adminfile already exists
+    mode_info_file = "adminfile.txt"
+    if os.path.exists(mode_info_file):
+        print("The system mode is already built.")
+        return
+
     # Logic to create admin user
     print(f"Creating admin user with username: {username} and password: {password}")
-    mode_info_file = "adminfile.txt"
     with open(mode_info_file, "w") as file:
         file.write(username)
         file.write(" ")
         file.write(password)
-        print(f"Admin user information written to {mode_info_file}")
+    print(f"Admin user information written to {mode_info_file}")
 
 def activate_account(user, command):
     if command == "activate":
