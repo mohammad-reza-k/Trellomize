@@ -1,7 +1,6 @@
 from rich.prompt import Prompt
 from rich.console import Console
 from rich.table import Table
-from datetime import datetime
 import hashlib
 import os
 import uuid
@@ -12,29 +11,41 @@ import json
 import time
 import manager
 import logging
+
+logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def today_date():
     return datetime.today().date()
+
 def time():
     return datetime.now().time()
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def log_file_operation(operation, file_path):
     try:
-        with open(file_path, 'a') as log_file:
-            log_file.write(f"{operation} operation performed on file: {file_path} in {time()} in {today_date()}\n")
+        with open(file_path, 'a') as file:
+            file.write(f"{operation} operation performed on file: {file_path} in {time()} in {today_date()}\n")
     except Exception as e:
         logging.error(f'Error logging file operation: {e}', exc_info=True)
 
 def log_user_action(user, action):
     try:
         with open('user_actions.log', 'a') as log_file:
-            log_file.write(f"User '{user}' performed action: Added {action} in {time()} in {today_date()} \n")
+            log_file.write(f"User '{user}' performed action: {action} in {time()} in {today_date()} \n")
+    except Exception as e:
+        logging.error(f'Error logging user action: {e}', exc_info=True)
+        
+def log_user_action_del(user, action):
+    try:
+        with open('user_actions.log', 'a') as log_file:
+            log_file.write(f"User '{user}' performed action: Deleted {action} in {time()} in {today_date()} \n")
     except Exception as e:
         logging.error(f'Error logging user action: {e}', exc_info=True)
 
 def log_system_event(event):
     try:
         with open('system_events.log', 'a') as log_file:
-            log_file.write(f"System event: {event} in {time()} in {today_date()} \n")
+            log_file.write(f"System event: project :{event} in {time()} Added in {today_date()} \n")
     except Exception as e:
         logging.error(f'Error logging system event: {e}', exc_info=True)
 
@@ -42,10 +53,12 @@ taskjson = "tasks.json"
 projson = "projects.json"
 members = "members.json"
 memberstask = "memberstask.json"
+descrip = "descriptionstask.json"
 projects_by_user = {}
 task_by_user = {}
 memberdic = {}
 membertaskdic = {}
+des = {}
 def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
     
@@ -61,13 +74,14 @@ def add_project():
                     projects_by_user[username] = [project_name]
         save_data(projects_by_user, projson)
         log_user_action(username, project_name)
-        log_system_event('New project added')
+        log_system_event(project_name)
         return projects_by_user
     except Exception as e:
         logging.error(f'Error in add_project function: {e}', exc_info=True)
 
-def delete_project(project_name_to_delete):
+def delete_project(user, project_name_to_delete):
     try:
+        log_user_action(user, f"deleted project '{project_name_to_delete}'")
         with open('projects.txt', 'r') as file:
             lines = file.readlines()
 
@@ -82,39 +96,87 @@ def delete_project(project_name_to_delete):
 
         if project_name_to_delete in projects_by_user:
             del task_by_user[project_name_to_delete]
+        save_data(task_by_user, taskjson)
 
-        log_user_action('System', 'Deleted project')
-        log_system_event('Project deleted')
+        if user in projects_by_user:
+            del projects_by_user[user]
+        save_data(projects_by_user, projson)
+
+        updated = []
+        with open('tasks.txt', 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                project_name, task_name , di= line.strip().split(' ')
+                if project_name != project_name_to_delete:
+                    updated.append(line)
+
+        with open('tasks.txt', 'w') as f:
+            f.writelines(updated)
+
+        with open('members.txt', 'r') as file:
+            lines = file.readlines()
+
+        update = []
+        for line in lines:
+            project_name, member_name = line.strip().split(' ')
+            if project_name != project_name_to_delete:
+                update.append(line)
+        with open('members.txt', 'w') as file:
+            file.writelines(updated_lines)
+
+        if project_name_to_delete in memberdic:
+            del memberdic[project_name_to_delete]
+        save_data(memberdic, members)
+
+        log_system_event(f"Project '{project_name_to_delete}' deleted successfully")
+        log_user_action_del(user_name , project_name_to_delete)
         return projects_by_user
     except Exception as e:
-        logging.error(f'Error in delete_project function: {e}', exc_info=True)
+        logging.error(f'Error deleting project: {e}', exc_info=True)
 
     
 def add_task():
     try:
         with open('tasks.txt', 'r') as file:
             for line in file:
-                project_name, task_name, description = line.strip().split(' ')
+                project_name, task_name, *description = line.strip().split(' ', 2)
+                description = ' '.join(description)  # Join the remaining elements as description
                 if project_name in task_by_user:
                     if task_name not in task_by_user[project_name]:
                         task_by_user[project_name].append(task_name)
                 else:
                     task_by_user[project_name] = [task_name]
         save_data(task_by_user, taskjson)
-        log_user_action('System', 'Added task')
-        log_system_event('New task added')
+        log_system_event(task_name)
+        log_user_action(user_name, task_name)
         return task_by_user
     except Exception as e:
-        logging.error(f'Error in add_task function: {e}', exc_info=True)
-        
+        logging.error(f'Error adding task: {e}', exc_info=True)
+
+def add_description():
+    try:      # Initialize an empty dictionary to store descriptions
+        with open('tasks.txt', 'r') as file:
+            for line in file:
+                # Split the line only twice to separate project_name and task_name,
+                # and then combine the remaining elements as description
+                project_name, task_name, *description = line.strip().split(' ', 2)
+                description = ' '.join(description)  # Join the remaining elements as description
+                des[task_name] = description
+        save_data(des, descrip)  # Save the descriptions to a file
+        log_user_action('System', 'Added description')
+        log_user_action(description)
+        return des
+    except Exception as e:
+        logging.error(f'Error adding task: {e}', exc_info=True)
 def delete_task(task_name_to_delete):
-    try:
+    try:    # Read the existing tasks from the file
         with open('tasks.txt', 'r') as file:
             lines = file.readlines()
 
         updated_lines = []
         for line in lines:
-            project_name, task_name, description = line.strip().split(' ')
+            project_name, task_name, *description = line.strip().split(' ', 2)
+            description = ' '.join(description)  # Join the remaining elements as description
             if task_name != task_name_to_delete:
                 updated_lines.append(line)
 
@@ -123,31 +185,31 @@ def delete_task(task_name_to_delete):
 
         if task_name_to_delete in task_by_user:
             del task_by_user[task_name_to_delete]
-
-        log_user_action('System', 'Deleted task')
-        log_system_event('Task deleted')
+        log_system_event(f"Project '{task_name_to_delete}' deleted successfully")
+        log_user_action('System', 'Added task')
+        save_data(task_by_user, taskjson)
         return task_by_user
     except Exception as e:
-        logging.error(f'Error in delete_task function: {e}', exc_info=True)
+        logging.error(f'Error adding task: {e}', exc_info=True)
 
     
 def add_members():
     try:
         with open('members.txt', 'r') as file:
             for line in file:
-                project_name, member_name = line.strip().split(' ')
+                project_name, member_name = line.strip().split(' ')  
                 if project_name in memberdic:
                     if member_name not in memberdic[project_name]:
                         memberdic[project_name].append(member_name)
                 else:
                     memberdic[project_name] = [member_name]
         save_data(memberdic, members)
-        log_user_action('System', 'Added members')
-        log_system_event('Members added')
+        log_system_event(f"member '{member_name}' Added successfully")
+        log_user_action('System', 'Added member')
         return memberdic
-    except Exception as e:
-        logging.error(f'Error in add_members function: {e}', exc_info=True)
-
+    except Exception as e :
+        logging.error(f'Error adding task: {e}', exc_info=True)
+        
 def delete_members(member_name_to_delete):
     try:
         with open('members.txt', 'r') as file:
@@ -164,21 +226,44 @@ def delete_members(member_name_to_delete):
 
         if member_name_to_delete in memberdic:
             del memberdic[member_name_to_delete]
-
+            
+        save_data(memberdic, members)
+        log_system_event(f"member '{member_name_to_delete}' deleted successfully")
         log_user_action('System', 'Deleted member')
-        log_system_event('Member deleted')
-        return memberdic
+        return memberdic#delete member from project
     except Exception as e:
-        logging.error(f'Error in delete_members function: {e}', exc_info=True)
+        logging.error(f'Error adding task: {e}', exc_info=True)
+        
+def add_member_to_task():
+    try:
+        with open('memberstask.txt', 'r') as file:
+            for line in file:
+                project_task_name, member_name = line.strip().split(' ')  
+                if project_task_name in membertaskdic:
+                    if member_name not in membertaskdic[project_task_name]:
+                        membertaskdic[project_task_name].append(member_name)
+                else:
+                    membertaskdic[project_task_name] = [member_name]
+        save_data(membertaskdic, memberstask)
+        log_system_event(f"member  '{member_name}' Added to task successfully")
+        log_user_action('System', 'Added member to task')
+        return membertaskdic
+    except Exception as e:
+        logging.error(f'Error adding task: {e}', exc_info=True)
+# descriptionss = []
+# def descriptions(task):
+#     with open('tasks.txt', 'r') as file:
+#         for line in file:
+#             project_name, task_name, description = line.strip().split(' ')
+#             if task_name==task:
+#                 descriptionss.append(description)  
+#     return description#s
 
     
+    
 def save_data(data_dic, files):
-    try:
-        with open(files, 'w') as json_file:
-            json.dump(data_dic, json_file, indent=4)
-        log_file_operation('Save', files)
-    except Exception as e:
-        logging.error(f'Error in save_data function: {e}', exc_info=True)
+    with open(files, 'w') as json_file:
+        json.dump(data_dic, json_file, indent=4)
 
 class Priority(Enum):
     CRITICAL = auto()
@@ -222,17 +307,7 @@ class Project:
             f.write(name)
             f.write('\n')
             add_member_to_task()
-        
 
-    # def modify_task(self, title=None, description=None, assigned_to=None):
-    #     for task in self.tasks:
-    #         if task.title == title:
-    #             if description:
-    #                 task.description = description
-    #             if assigned_to:
-    #                 task.assigned_to = assigned_to
-    #             return True
-    #     return False
 
     def add_member(self, username):
         with open("members.txt", 'a') as f:
@@ -385,11 +460,11 @@ def display_user_page(user):
                             if i==user.username:
                                 for j in range(len(dic[i])):
                                     if dic[i][j] in dicm:
-                                        table.add_row(f"{dic[i][j]}", f"{dicm[dic[i][j]]}")####################################
+                                        table.add_row(f"{dic[i][j]}", f"{dicm[dic[i][j]]}")#table project
                                     else:
                                         table.add_row(f"{dic[i][j]}", "No members yet")
                         console.print(table)
-                        ch = Prompt.ask("\n1.delete project \n2.View tasks\n3.Assigne tasks\n4.add members/view members\n5.Go back\n")
+                        ch = Prompt.ask("\n1.delete project \n2.View tasks\n3.Assigne tasks\n4.add members/view members\n5.Go back and refresh\n")
                         if ch=='2':
                             clear_console()
                             project = Prompt.ask("Enter your projects name you want:\n")
@@ -402,23 +477,25 @@ def display_user_page(user):
                                         pro = return_project(project, user.username)
                                         tabl = Table(title="Your Tasks")
                                         tabl.add_column("Name", style="cyan", no_wrap=True)
-                                        tabl.add_column("Members", style="magenta")
-                                        print(dicc)
+                                        tabl.add_column("Members Assigned", style="magenta")
+                                        tabl.add_column("Description", style="magenta")
+                                        
                                         for i in dicc:
                                             if i==project:
                                                 for j in range(len(dicc[i])):
+                                                    des = add_description()
                                                     if i+dicc[i][j] in di:
-                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}")##############################################
+                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}", f"{des[dicc[i][j]]}")#tabel task
                                                     else:
-                                                        tabl.add_row(f"{dicc[i][j]}", 'No assignment yet')
+                                                        tabl.add_row(f"{dicc[i][j]}", 'No assignment yet', f"{des[dicc[i][j]]}")#########changing description
                                         console.print(tabl)
                                         option = Prompt.ask("1.add new task\n2.delete task\n3.Go back\n")
                                         if option == '1':
                                             clear_console()
                                             name = Prompt.ask("Enter the Name of the task:")
-                                            discription = Prompt.ask("what dis cription for the task you want to add:")
-                                            pro.create_task(name, discription)
-                                            pro.create_task(name, discription)#refresh
+                                            description = Prompt.ask("what description for the task you want to add:")
+                                            pro.create_task(name, description)
+                                            pro.create_task(name, description)#refresh
 
                                             console.print("[bold blue]Task Created successfully![/bold blue]\n")
                                         #new task with priority
@@ -442,13 +519,13 @@ def display_user_page(user):
                                             
                                 else:
                                     clear_console()
-                                    console.print("No tasks yet\n")#return??
+                                    console.print("[bold yellow]No tasks yet[/bold yellow]\n")
                                     pro = return_project(project, user.username)
                                     option = Prompt.ask("1.add new task\n2.delete a task\n3.Go back\n")
                                     if option == '1':
                                         clear_console()
                                         name = Prompt.ask("Enter the Name of the task:")
-                                        discription = Prompt.ask("what dis cription for the task you want to add:")
+                                        discription = Prompt.ask("what description for the task you want to add:")
                                         pro.create_task(name, discription)
                                         pro = return_project(project, user.username)
                                     #new task with priority
@@ -469,7 +546,7 @@ def display_user_page(user):
 
                             else:
                                 clear_console()
-                                console.print("[bold red]No such a project[/bold red]\n")#return??
+                                console.print("[bold red]No such a project[/bold red]\n")
                         elif ch == '3':
                             clear_console()
                             option = Prompt.ask("Enter name of a project")#and check meber and task and check task and add to a file 
@@ -478,35 +555,39 @@ def display_user_page(user):
                             dicc = add_task()
                             for i in dic[user.username]:
                                 if i != option:
-                                    console.print(f"[bold red]No such a project named '{option}'[/bold red]\n")#return??
+                                    console.print(f"[bold red]No such a project named '{option}'[/bold red]\n")
                                 else:
                                     if not option in dicc:
-                                        console.print(f"[bold red]No tasks in '{option}'[/bold red]\n")#retur??
+                                        console.print(f"[bold red]No tasks in '{option}'[/bold red]\n")
                                     else:
                                         for j in dicc[option]:
                                             if j != taskkk:
-                                                console.print(f"[bold red]No such a task named '{taskkk}'[/bold red]\n")#retur??
+                                                console.print(f"[bold red]No such a task named '{taskkk}'[/bold red]\n")
                                             else:
                                                 dicm = add_members()
-                                                if len(dicm[option])==0:
+                                                if not option in dicm:
                                                    console.print(f"[bold red]No members in '{option}'[/bold red]\n") 
                                                 elif not memb in dicm[option]:
                                                     console.print(f"[bold red]No member named '{memb}' in project '{option}'[/bold red]\n") 
                                                 else:
                                                     di = add_member_to_task()
-                                                    if not option+taskkk in di:
-                                                        console.print("[bold red]No members assigned[/bold red]")
+                                                    if len(di)==0:
+                                                        pro = return_project(option, user.username)
+                                                        pro.assign_task(taskkk, memb)
                                                     else:
-                                                        a=0 #couter for adding
-                                                        for z in di[option+taskkk]:
-                                                            if z == memb and a==0:
-                                                                console.print(f"[bold yellow]user {memb} is already in project '{option}' and task '{taskkk}'[/bold yellow]")#return??
-                                                                a=1
-                                                        if a==0:
-                                                            pro = return_project(option, user.username)
-                                                            pro.assign_task(taskkk, memb)
+                                                        if not option+taskkk in di:
+                                                            console.print("[bold red]No members assigned[/bold red]")
+                                                        else:
+                                                            a=0 #couter for adding
+                                                            for z in di[option+taskkk]:
+                                                                if z == memb and a==0:
+                                                                    console.print(f"[bold yellow]user {memb} is already in project '{option}' and task '{taskkk}'[/bold yellow]")#return??
+                                                                    a=1
+                                                            if a==0:
+                                                                pro = return_project(option, user.username)
+                                                                pro.assign_task(taskkk, memb)
                                                             
-                                                            #pro.assign_task(taskkk, memb)#refresh??
+                                                                #pro.assign_task(taskkk, memb)#refresh??
                                 
                         elif ch == '5':
                             clear_console()
@@ -522,19 +603,31 @@ def display_user_page(user):
                                 a=0 #counter for adding member onc
                                 with open('manba.txt', 'r') as file:                                
                                     for line in file:
-                                        if member in d[project] and a==0:
-                                            console.print(f"[bold yellow]user '{member}' is already in teh project[/bold yellow]")
-                                            a=1
-                                        elif member in line and a==0:
-                                            pro.add_member(member)
-                                            pro.add_member(member)#refresh
-                                            console.print('[bold green]Member added successfully![/bold green]')
-                                            a=1
+                                        email, nam,ram, t=line.strip().split(' ') 
+                                        if len(d)==0:
+                                            if (member==email or member==nam) and a==0:
+                                                pro.add_member(member)
+                                                pro.add_member(member)#refresh
+                                                console.print('[bold green]Member added successfully![/bold green]')
+                                                a=1
+
+                                        else:
+                                            if project in d and member in d[project]:
+                                                a=2
+                                            elif (member==email or member==nam) and a==0:
+                                                pro.add_member(member)
+                                                pro.add_member(member)#refresh
+                                                console.print('[bold green]Member added successfully![/bold green]')
+                                                a=1
+                                                break
+
                                     if a==0:
-                                        console.print(f"[bold red]No user account named {member} found[/bold red]")      
-                                
+                                        console.print(f"[bold red]No user account named '{member}' found[/bold red]")      
+                                    if a==2:
+                                        console.print(f"[bold yellow]user '{member}' is already in the project[/bold yellow]")
+
                             else:
-                                console.print("[bold red]No such a project[/bold red]\n")#return??
+                                console.print("[bold red]No such a project[/bold red]\n")
                         elif ch == '1':
                             clear_console()
                             proro = Prompt.ask("Name of the project you want to delete:")
@@ -542,7 +635,8 @@ def display_user_page(user):
                                 if i==user.username:
                                     if proro in dic[i]:
                                         dic[user.username].remove(proro)
-                                        delete_project(proro)
+                                        delete_project(user.username,proro)
+                                        break
                                     else:
                                         console.print("[bold yellow]No such a project[/bold yellow]\n") 
 
@@ -597,6 +691,7 @@ def main():
 
             if check_pass(nam, hashh(ramz), "manba.txt"):
                 console.print("[bold green]log in sucsusfully![/bold green]\n")
+                tedad_vorood(nam , "manage.txt")
                 user = login_acc(nam, ramz)
                 display_user_page(user) 
             elif not check_pass(nam, ramz, "manba.txt"):
