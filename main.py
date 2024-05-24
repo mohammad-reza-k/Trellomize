@@ -156,17 +156,16 @@ def add_task():
         logging.error(f'Error adding task: {e}', exc_info=True)
 
 def add_description():
-    try:      # Initialize an empty dictionary to store descriptions
+    try:
         with open('tasks.txt', 'r') as file:
             for line in file:
-                # Split the line only twice to separate project_name and task_name,
-                # and then combine the remaining elements as description
                 project_name, task_name, *description = line.strip().split(' ', 2)
                 description = ' '.join(description)  # Join the remaining elements as description
                 des[task_name] = description
+        # log_user_action('System', 'Added description')
+        # log_user_action(description)
+
         save_data(des, descrip)  # Save the descriptions to a file
-        log_user_action('System', 'Added description')
-        log_user_action(description)
         return des
     except Exception as e:
         logging.error(f'Error adding task: {e}', exc_info=True)
@@ -435,7 +434,7 @@ def display_user_page(user):
                 clear_console()
                 dic = add_project()
                 dicm = add_members()
-                if not user.username in dic.keys():
+                if dic is None or not user.username in dic:
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
                 else:
                     while True:
@@ -446,7 +445,9 @@ def display_user_page(user):
                         for i in dic:
                             if i==user.username:
                                 for j in range(len(dic[i])):
-                                    if dic[i][j] in dicm:
+                                    if dicm is None:
+                                        table.add_row(f"{dic[i][j]}", f"No members yet")#table project
+                                    elif dic[i][j] in dicm:
                                         table.add_row(f"{dic[i][j]}", f"{dicm[dic[i][j]]}")#table project
                                     else:
                                         table.add_row(f"{dic[i][j]}", "No members yet")
@@ -457,8 +458,8 @@ def display_user_page(user):
                             project = Prompt.ask("Enter your projects name you want:\n")
                             if project in dic[user.username]:
                                 dicc = add_task()
-                                if project in dicc.keys():
-                                #view tasks are in
+                                if not dicc is None and project in dicc.keys():
+                                    #view tasks are in
                                     while True:
                                         di = add_member_to_task()
                                         pro = return_project(project, user.username)
@@ -471,8 +472,10 @@ def display_user_page(user):
                                             if i==project:
                                                 for j in range(len(dicc[i])):
                                                     des = add_description()
-                                                    if i+dicc[i][j] in di:
-                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}", f"{des[dicc[i][j]]}")#tabel task
+                                                    if di is None:
+                                                        tabl.add_row(f"{dicc[i][j]}", "No assignment yet", f"{des[dicc[i][j]]}")#tabel task
+                                                    elif i+dicc[i][j] in di:
+                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}", f"{des[dicc[i][j]]}")#tabel task  
                                                     else:
                                                         tabl.add_row(f"{dicc[i][j]}", 'No assignment yet', f"{des[dicc[i][j]]}")#########changing description
                                         console.print(tabl)
@@ -561,7 +564,7 @@ def display_user_page(user):
                                     pass#console.print(f"[bold red]No such a project named '{option}'[/bold red]\n")
                                 else:
                                     x=1
-                                    if not option in dicc:
+                                    if dicc is None:
                                         console.print(f"[bold red]No tasks in '{option}'[/bold red]\n")
                                     else:
                                         z=0
@@ -618,7 +621,7 @@ def display_user_page(user):
                                 with open('manba.txt', 'r') as file:                                
                                     for line in file:
                                         email, nam,ram, t=line.strip().split(' ') 
-                                        if len(d)==0:
+                                        if d is None==0:
                                             if (member==email or member==nam) and a==0:
                                                 pro.add_member(member)
                                                 pro.add_member(member)#refresh
@@ -626,7 +629,7 @@ def display_user_page(user):
                                                 a=1
 
                                         else:
-                                            if project in d and member in d[project]:
+                                            if not d is None and project in d and member in d[project]:
                                                 a=2
                                             elif (member==email or member==nam) and a==0:
                                                 pro.add_member(member)
