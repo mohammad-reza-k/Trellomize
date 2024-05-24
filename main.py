@@ -67,7 +67,7 @@ def delete_project(user,project_name_to_delete):
     with open('tasks.txt', 'r') as file:
         lines = file.readlines()
         for line in lines:
-            project_name, task_name , di= line.strip().split(' ')
+            project_name, task_name , di= line.strip().split(' ', 2)
             if project_name != project_name_to_delete:
                 updated.append(line)
     with open('tasks.txt', 'w') as f:
@@ -221,7 +221,7 @@ class Project:
         with open("task_details.txt", 'a') as f:
             f.write(f"{self.title} {title} {priority.name} {status.name}\n")
 
-    def assign_task(self, assigned_to_task, name):
+    def assigne_task(self, assigned_to_task, name):
         with open('memberstask.txt', 'a') as f:
             f.write(f"{self.title}{assigned_to_task} {name}\n")
             add_member_to_task()
