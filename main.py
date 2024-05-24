@@ -25,7 +25,8 @@ task_by_user = {}
 memberdic = {}
 membertaskdic = {}
 des = {}
-
+prio={}
+timee = {}
 def today_date():
     return datetime.today().date()
 
@@ -170,6 +171,42 @@ def add_description():
     except Exception as e:
         logging.error(f'Error adding task: {e}', exc_info=True)
 
+def add_status():
+    try:
+        with open('task_details.txt', 'r') as file:
+            for line in file:
+                project_name, task_name, priority, status = line.strip().split(' ')  
+                if task_name in prio:
+                    if priority not in prio[task_name] and status not in prio[task_name]:
+                        prio[task_name].append(priority)
+                        prio[task_name].append(status)
+                else:
+                    prio[task_name] = [priority,status]
+
+        save_data(prio, 'prio.json')  
+        return prio
+    except Exception as e:
+        logging.error(f'Error adding priority and status: {e}', exc_info=True)####################################################33
+
+def add_time():
+    try:
+        with open('time.txt', 'r') as file:
+            for line in file:
+                project_name, task_name, start, s, stop,t = line.strip().split(' ')  
+                if task_name in timee:
+                    timee[task_name].append(start)
+                    timee[task_name].append(s)
+                    timee[task_name].append(stop)
+                    timee[task_name].append(t)
+                else:
+                    timee[task_name] = [start,s,stop,t]
+
+        save_data(timee, 'time.json')  
+        return timee
+    except Exception as e:
+        logging.error(f'Error adding time: {e}', exc_info=True)####################################################33
+
+    
 def delete_task(task_name_to_delete):
     try:    # Read the existing tasks from the file
         with open('tasks.txt', 'r') as file:
@@ -483,25 +520,32 @@ def display_user_page(user):
                                 if not dicc is None and project in dicc.keys():
                                     #view tasks are in
                                     while True:
+                                        #clear_console()
                                         di = add_member_to_task()
+                                        sta = add_status()
+                                        tim = add_time()
+
                                         pro = return_project(project, user.username)
                                         tabl = Table(title="Your Tasks")
                                         tabl.add_column("Name", style="cyan", no_wrap=True)
                                         tabl.add_column("Members Assigned", style="magenta")
                                         tabl.add_column("Description", style="magenta")
-                                        
+                                        tabl.add_column("Priority", style="magenta")
+                                        tabl.add_column("Status", style="magenta")
+                                        tabl.add_column("Start time", style="magenta")
+                                        tabl.add_column("End time", style="magenta")
                                         for i in dicc:
                                             if i==project:
                                                 for j in range(len(dicc[i])):
                                                     des = add_description()
                                                     if di is None:
-                                                        tabl.add_row(f"{dicc[i][j]}", "No assignment yet", f"{des[dicc[i][j]]}")#tabel task
+                                                        tabl.add_row(f"{dicc[i][j]}", "No assignment yet", f"{des[dicc[i][j]]}", f"{sta[dicc[i][j]][0]}", f"{sta[dicc[i][j]][1]}", f"{tim[dicc[i][j]][0]} at {tim[dicc[i][j]][1]}", f"{tim[dicc[i][j]][2]} at {tim[dicc[i][j]][3]}")#tabel task
                                                     elif i+dicc[i][j] in di:
-                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}", f"{des[dicc[i][j]]}")#tabel task  
+                                                        tabl.add_row(f"{dicc[i][j]}", f"{di[i+dicc[i][j]]}", f"{des[dicc[i][j]]}", f"{sta[dicc[i][j]][0]}", f"{sta[dicc[i][j]][1]}", f"{tim[dicc[i][j]][0]} at {tim[dicc[i][j]][1]}", f"{tim[dicc[i][j]][2]} at {tim[dicc[i][j]][3]}")#tabel task  
                                                     else:
-                                                        tabl.add_row(f"{dicc[i][j]}", 'No assignment yet', f"{des[dicc[i][j]]}")#########changing description
+                                                        tabl.add_row(f"{dicc[i][j]}", 'No assignment yet', f"{des[dicc[i][j]]}", f"{sta[dicc[i][j]][0]}", f"{sta[dicc[i][j]][1]}", f"{tim[dicc[i][j]][0]} at {tim[dicc[i][j]][1]}", f"{tim[dicc[i][j]][2]} at {tim[dicc[i][j]][3]}")#########changing description
                                         console.print(tabl)
-                                        option = Prompt.ask("1.add new task\n2.delete task\n3.change status\n4.view priority and status\n5.Go back\n")
+                                        option = Prompt.ask("1.add new task\n2.delete task\n3.change status\n4.Go back\n")
                                         if option == '1':
                                             clear_console()
                                             name = Prompt.ask("Enter the Name of the task:")
@@ -537,7 +581,7 @@ def display_user_page(user):
                                                     else:
                                                         console.print("[bold yellow]No such a task in your project[/bold yellow]\n") 
                                             
-                                        elif option == '5':
+                                        elif option == '4':
                                             clear_console()
                                             break
                                         elif option == '3':
@@ -552,9 +596,6 @@ def display_user_page(user):
                                                 pro.change_status(project, t, 'TODO')
                                             else:
                                                 pro.change_status(project, t, 'BACKLOG')
-                                        elif option == '4':
-                                            clear_console()
-                                            
                                         else:
                                             clear_console()
                                             console.print("[bold red]invalid choice[/bold red]\n")
