@@ -12,6 +12,8 @@ import time
 import manager
 import logging
 
+logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 taskjson = "tasks.json"
 projson = "projects.json"
 members = "members.json"
@@ -22,44 +24,6 @@ task_by_user = {}
 memberdic = {}
 membertaskdic = {}
 des = {}
-
-logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
-def today_date():
-    return datetime.today().date()
-
-def time():
-    return datetime.now().time()
-
-def log_file_operation(operation, file_path):
-    try:
-        with open(file_path, 'a') as file:
-            file.write(f"{operation} operation performed on file: {file_path} in {time()} in {today_date()}\n")
-    except Exception as e:
-        logging.error(f'Error logging file operation: {e}', exc_info=True)
-
-def log_user_action(user, action):
-    try:
-        with open('user_actions.log', 'a') as log_file:
-            log_file.write(f"User '{user}' performed action: {action} in {time()} in {today_date()} \n")
-    except Exception as e:
-        logging.error(f'Error logging user action: {e}', exc_info=True)
-        
-def log_user_action_del(user, action):
-    try:
-        with open('user_actions.log', 'a') as log_file:
-            log_file.write(f"User '{user}' performed action: Deleted {action} in {time()} in {today_date()} \n")
-    except Exception as e:
-        logging.error(f'Error logging user action: {e}', exc_info=True)
-
-def log_system_event(event):
-    try:
-        with open('system_events.log', 'a') as log_file:
-            log_file.write(f"System event: project :{event} in {time()} Added in {today_date()} \n")
-    except Exception as e:
-        logging.error(f'Error logging system event: {e}', exc_info=True)
-
-
 def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
     
@@ -67,190 +31,152 @@ def add_project():
     try:
         with open('projects.txt', 'r') as file:
             for line in file:
-                username, project_name = line.strip().split(' ')
+                username, project_name = line.strip().split(' ')  
                 if username in projects_by_user:
                     if project_name not in projects_by_user[username]:
                         projects_by_user[username].append(project_name)
                 else:
                     projects_by_user[username] = [project_name]
         save_data(projects_by_user, projson)
-        log_user_action(username, project_name)
-        log_system_event(project_name)
         return projects_by_user
     except Exception as e:
         logging.error(f'Error in add_project function: {e}', exc_info=True)
 
-def delete_project(user, project_name_to_delete):
-    try:
-        log_user_action(user, f"deleted project '{project_name_to_delete}'")
-        with open('projects.txt', 'r') as file:
-            lines = file.readlines()
+def delete_project(user,project_name_to_delete):
+    # Read the existing tasks from the file
+    with open('projects.txt', 'r') as file:
+        lines = file.readlines()
 
-        updated_lines = []
+    updated_lines = []
+    for line in lines:
+        user_name, project_name = line.strip().split(' ')
+        if project_name != project_name_to_delete:
+            updated_lines.append(line)
+    with open('projects.txt', 'w') as file:
+        file.writelines(updated_lines)
+        
+    if project_name_to_delete in projects_by_user:
+        del task_by_user[project_name_to_delete]
+    save_data(task_by_user, taskjson)
+    
+    if user in projects_by_user:
+        del projects_by_user[user]
+    save_data(projects_by_user, projson)
+    updated = []
+    with open('tasks.txt', 'r') as file:
+        lines = file.readlines()
         for line in lines:
-            user_name, project_name = line.strip().split(' ')
+            project_name, task_name , di= line.strip().split(' ')
             if project_name != project_name_to_delete:
-                updated_lines.append(line)
+                updated.append(line)
+    with open('tasks.txt', 'w') as f:
+        f.writelines(updated)
 
-        with open('projects.txt', 'w') as file:
-            file.writelines(updated_lines)
+    with open('members.txt', 'r') as file:
+        lines = file.readlines()
 
-        if project_name_to_delete in projects_by_user:
-            del task_by_user[project_name_to_delete]
-        save_data(task_by_user, taskjson)
+    update = []
+    for line in lines:
+        project_name, member_name = line.strip().split(' ')
+        if project_name != project_name_to_delete:
+            update.append(line)
+    with open('members.txt', 'w') as file:
+        file.writelines(updated_lines)
+        
+    if project_name_to_delete in memberdic:
+        del memberdic[project_name_to_delete]
+    save_data(memberdic, members)
 
-        if user in projects_by_user:
-            del projects_by_user[user]
-        save_data(projects_by_user, projson)
-
-        updated = []
-        with open('tasks.txt', 'r') as file:
-            lines = file.readlines()
-            for line in lines:
-                project_name, task_name , di= line.strip().split(' ')
-                if project_name != project_name_to_delete:
-                    updated.append(line)
-
-        with open('tasks.txt', 'w') as f:
-            f.writelines(updated)
-
-        with open('members.txt', 'r') as file:
-            lines = file.readlines()
-
-        update = []
-        for line in lines:
-            project_name, member_name = line.strip().split(' ')
-            if project_name != project_name_to_delete:
-                update.append(line)
-        with open('members.txt', 'w') as file:
-            file.writelines(updated_lines)
-
-        if project_name_to_delete in memberdic:
-            del memberdic[project_name_to_delete]
-        save_data(memberdic, members)
-
-        log_system_event(f"Project '{project_name_to_delete}' deleted successfully")
-        log_user_action_del(user_name , project_name_to_delete)
-        return projects_by_user
-    except Exception as e:
-        logging.error(f'Error deleting project: {e}', exc_info=True)
+    return projects_by_user
 
     
 def add_task():
-    try:
-        with open('tasks.txt', 'r') as file:
-            for line in file:
-                project_name, task_name, *description = line.strip().split(' ', 2)
-                description = ' '.join(description)  # Join the remaining elements as description
-                if project_name in task_by_user:
-                    if task_name not in task_by_user[project_name]:
-                        task_by_user[project_name].append(task_name)
-                else:
-                    task_by_user[project_name] = [task_name]
-        save_data(task_by_user, taskjson)
-        log_system_event(task_name)
-        log_user_action(user_name, task_name)
-        return task_by_user
-    except Exception as e:
-        logging.error(f'Error adding task: {e}', exc_info=True)
-
-def add_description():
-    try:      # Initialize an empty dictionary to store descriptions
-        with open('tasks.txt', 'r') as file:
-            for line in file:
-                # Split the line only twice to separate project_name and task_name,
-                # and then combine the remaining elements as description
-                project_name, task_name, *description = line.strip().split(' ', 2)
-                description = ' '.join(description)  # Join the remaining elements as description
-                des[task_name] = description
-        save_data(des, descrip)  # Save the descriptions to a file
-        log_user_action('System', 'Added description')
-        log_user_action(description)
-        return des
-    except Exception as e:
-        logging.error(f'Error adding task: {e}', exc_info=True)
-def delete_task(task_name_to_delete):
-    try:    # Read the existing tasks from the file
-        with open('tasks.txt', 'r') as file:
-            lines = file.readlines()
-
-        updated_lines = []
-        for line in lines:
+    with open('tasks.txt', 'r') as file:
+        for line in file:
             project_name, task_name, *description = line.strip().split(' ', 2)
             description = ' '.join(description)  # Join the remaining elements as description
-            if task_name != task_name_to_delete:
-                updated_lines.append(line)
+            if project_name in task_by_user:
+                if task_name not in task_by_user[project_name]:
+                    task_by_user[project_name].append(task_name)
+            else:
+                task_by_user[project_name] = [task_name]
+    save_data(task_by_user, taskjson)
+    return task_by_user
 
-        with open('tasks.txt', 'w') as file:
-            file.writelines(updated_lines)
+def add_description():
+      # Initialize an empty dictionary to store descriptions
+    with open('tasks.txt', 'r') as file:
+        for line in file:
+            # Split the line only twice to separate project_name and task_name,
+            # and then combine the remaining elements as description
+            project_name, task_name, *description = line.strip().split(' ', 2)
+            description = ' '.join(description)  # Join the remaining elements as description
+            des[task_name] = description
+    save_data(des, descrip)  # Save the descriptions to a file
+    return des
 
-        if task_name_to_delete in task_by_user:
-            del task_by_user[task_name_to_delete]
-        log_system_event(f"Project '{task_name_to_delete}' deleted successfully")
-        log_user_action('System', 'Added task')
-        save_data(task_by_user, taskjson)
-        return task_by_user
-    except Exception as e:
-        logging.error(f'Error adding task: {e}', exc_info=True)
+def delete_task(task_name_to_delete):
+    # Read the existing tasks from the file
+    with open('tasks.txt', 'r') as file:
+        lines = file.readlines()
 
+    updated_lines = []
+    for line in lines:
+        project_name, task_name, *description = line.strip().split(' ', 2)
+        description = ' '.join(description)  # Join the remaining elements as description
+        if task_name != task_name_to_delete:
+            updated_lines.append(line)
+
+    with open('tasks.txt', 'w') as file:
+        file.writelines(updated_lines)
+
+    if task_name_to_delete in task_by_user:
+        del task_by_user[task_name_to_delete]
+    save_data(task_by_user, taskjson)
+    return task_by_user
+    
     
 def add_members():
-    try:
-        with open('members.txt', 'r') as file:
-            for line in file:
-                project_name, member_name = line.strip().split(' ')  
-                if project_name in memberdic:
-                    if member_name not in memberdic[project_name]:
-                        memberdic[project_name].append(member_name)
-                else:
-                    memberdic[project_name] = [member_name]
-        save_data(memberdic, members)
-        log_system_event(f"member '{member_name}' Added successfully")
-        log_user_action('System', 'Added member')
-        return memberdic
-    except Exception as e :
-        logging.error(f'Error adding task: {e}', exc_info=True)
-        
+    with open('members.txt', 'r') as file:
+        for line in file:
+            project_name, member_name = line.strip().split(' ')  
+            if project_name in memberdic:
+                if member_name not in memberdic[project_name]:
+                    memberdic[project_name].append(member_name)
+            else:
+                memberdic[project_name] = [member_name]
+    save_data(memberdic, members)
+    return memberdic
+
 def delete_members(member_name_to_delete):
-    try:
-        with open('members.txt', 'r') as file:
-            lines = file.readlines()
+    with open('members.txt', 'r') as file:
+        lines = file.readlines()
 
-        updated_lines = []
-        for line in lines:
-            project_name, member_name = line.strip().split(' ')
-            if member_name != member_name_to_delete:
-                updated_lines.append(line)
+    updated_lines = []
+    for line in lines:
+        project_name, member_name = line.strip().split(' ')
+        if member_name != member_name_to_delete:
+            updated_lines.append(line)
 
-        with open('member.txt', 'w') as file:
-            file.writelines(updated_lines)
+    with open('member.txt', 'w') as file:
+        file.writelines(updated_lines)
 
-        if member_name_to_delete in memberdic:
-            del memberdic[member_name_to_delete]
-            
-        save_data(memberdic, members)
-        log_system_event(f"member '{member_name_to_delete}' deleted successfully")
-        log_user_action('System', 'Deleted member')
-        return memberdic#delete member from project
-    except Exception as e:
-        logging.error(f'Error adding task: {e}', exc_info=True)
-        
+    if member_name_to_delete in memberdic:
+        del memberdic[member_name_to_delete]
+    return memberdic#delete member from project
+
 def add_member_to_task():
-    try:
-        with open('memberstask.txt', 'r') as file:
-            for line in file:
-                project_task_name, member_name = line.strip().split(' ')  
-                if project_task_name in membertaskdic:
-                    if member_name not in membertaskdic[project_task_name]:
-                        membertaskdic[project_task_name].append(member_name)
-                else:
-                    membertaskdic[project_task_name] = [member_name]
-        save_data(membertaskdic, memberstask)
-        log_system_event(f"member  '{member_name}' Added to task successfully")
-        log_user_action('System', 'Added member to task')
-        return membertaskdic
-    except Exception as e:
-        logging.error(f'Error adding task: {e}', exc_info=True)
+    with open('memberstask.txt', 'r') as file:
+        for line in file:
+            project_task_name, member_name = line.strip().split(' ')  
+            if project_task_name in membertaskdic:
+                if member_name not in membertaskdic[project_task_name]:
+                    membertaskdic[project_task_name].append(member_name)
+            else:
+                membertaskdic[project_task_name] = [member_name]
+    save_data(membertaskdic, memberstask)
+    return membertaskdic
+
 # descriptionss = []
 # def descriptions(task):
 #     with open('tasks.txt', 'r') as file:
@@ -678,21 +604,11 @@ def main():
             clear_console()
             nam= Prompt.ask("enter your email or username\n")
             ramz = Prompt.ask("Enter Your Pass:\n")
-            if check_admin(nam , ramz ):
-                a=input("\nSelect an option:\n1. managing Acc\n2. Destroying Data\n")
-                if a=="1":
-                    acc_ban=input("enter Acc that you want\n")
-                    command=input("enter your command:\n1.activate\n2. diacivate\n")
-                    manager.activate_account(acc_ban ,command)
-                if a=="2":
-                    manager.purge_data()
-                else:
-                    print("kerm nariz")
-                    break
+            # if check_admin(nam , ramz ):
+            #     print("meow")
 
             if check_pass(nam, hashh(ramz), "manba.txt"):
                 console.print("[bold green]log in sucsusfully![/bold green]\n")
-                tedad_vorood(nam , "manage.txt")
                 user = login_acc(nam, ramz)
                 display_user_page(user) 
             elif not check_pass(nam, ramz, "manba.txt"):

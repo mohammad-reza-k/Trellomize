@@ -1,0 +1,18 @@
+2024-05-24 13:07:12,245 - ERROR - Error adding task: [Errno 2] No such file or directory: 'members.txt'
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 198, in add_members
+    with open('members.txt', 'r') as file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'members.txt'
+2024-05-24 13:25:26,504 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 207, in add_members
+    log_system_event(f"member '{member_name}' Added successfully")
+                                ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-24 13:28:12,683 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 208, in add_members
+    log_system_event(f"member '{member_name}' Added successfully")
+                                ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
