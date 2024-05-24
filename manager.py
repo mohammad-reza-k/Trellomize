@@ -71,18 +71,33 @@ def purge_data():
     confirmation = input("Are you sure you want to purge all data? (yes/no): ")
     if confirmation.lower() == "yes":
         # Open the file in write mode to clear its contents
-        with open("manba.txt", "w") as f:
-            pass  
-        
-        with open("projects.txt" ,"w") as fi:
+        with open ("tasks.json" , "w") as g:
+            pass
+        with open ("projects.json" ,"w") as q:
             pass
         with open("members.json" ,"w") as p:
             pass
+        with open("memberstask.json" , "w") as r:
+            pass
+        with open("descriptionstask.json" ,"w") as qw:
+            pass
+        with open("projects.txt" ,"w") as fi:
+            pass
+        with open("tasks.txt" , "w") as ew:
+            pass
         with open ("members.txt" , "w") as d:
             pass
-        with open ("tasks.json" , "w") as g:
+        with open ("memberstask.json" "w") as gh:
+            pass
+        with open("time.txt" ,"w") as lk:
+            pass
+        with open("task_detail.txt" ,"w") as oi:
             pass
         
+        with open("manba.txt", "w") as f:
+            pass  
+        
+       
         print("All data has been purged successfully.")
          
     else:
