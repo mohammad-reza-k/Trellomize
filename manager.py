@@ -69,7 +69,16 @@ def purge_data():
         print("All data has been purged successfully.")
     else:
         print("Operation cancelled.")
-
+def logging(event):
+    if event == '1':
+        with open('user_actions.log', 'r') as f:
+            for lines in f:
+                print(lines, end='')
+    else:
+        with open('system_events.log', 'r') as f:
+            for lines in f:
+                print(lines, end='')
+            
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Manage system modes")
     subparsers = parser.add_subparsers(dest="command", help="Commands")

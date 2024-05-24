@@ -279,6 +279,7 @@ class Task:
         self.priority = priority
         self.status = status
 
+
 class Project:
     def __init__(self, title, creator):
         self.title = title
@@ -306,6 +307,23 @@ class Project:
             f.write(f"{self.title} {username}\n")
             add_members()
 
+    def change_status(self,project_name, task_name, changing_status):
+        with open("task_details.txt", 'r') as file:
+            lines = file.readlines()
+
+        new_lines = []
+        for line in lines:
+            elements = line.split()
+            if len(elements) >= 4:
+                if elements[1] == task_name and elements[0]==project_name:
+                    elements[3] = changing_status  # changing status
+                    new_line = ' '.join(elements)
+                    new_lines.append(new_line + '\n')
+                else:
+                    new_lines.append(line)
+        with open("task_details.txt", 'w') as file:
+            file.writelines(new_lines)
+    
 def return_project(title, creator):
     return Project(title, creator)
 
@@ -376,12 +394,16 @@ def create_acc():
          
 def check_admin(username , passw):
     a = 0
-    with open ("adminfile.txt" , "r") as file:
-        content = file.read()
-        if (username and passw) in content:
-            a = 1
-        
-    return a# admin
+    try:
+        with open ("adminfile.txt" , "r") as file:
+            content = file.readlines()
+            for line in content:
+                admin, adminn=line.strip().split(' ')
+                if admin==username and adminn==passw:
+                    a = 1
+        return a# admin
+    except Exception as e:
+        logging.error(f'Error opening admin file: {e}', exc_info=True)
 
 def login_acc(username, password):
     return User(username, password)
@@ -479,7 +501,7 @@ def display_user_page(user):
                                                     else:
                                                         tabl.add_row(f"{dicc[i][j]}", 'No assignment yet', f"{des[dicc[i][j]]}")#########changing description
                                         console.print(tabl)
-                                        option = Prompt.ask("1.add new task\n2.delete task\n3.Go back\n")
+                                        option = Prompt.ask("1.add new task\n2.delete task\n3.change status\n4.view priority and status\n5.Go back\n")
                                         if option == '1':
                                             clear_console()
                                             name = Prompt.ask("Enter the Name of the task:")
@@ -515,9 +537,24 @@ def display_user_page(user):
                                                     else:
                                                         console.print("[bold yellow]No such a task in your project[/bold yellow]\n") 
                                             
-                                        elif option == '3':
+                                        elif option == '5':
                                             clear_console()
                                             break
+                                        elif option == '3':
+                                            clear_console()
+                                            t = Prompt.ask("Name of the task you want to change")
+                                            status = Prompt.ask("How it goes (t for TODO, d for DOING, a for ARCHIVED, nothing for BACKLOG)\n")
+                                            if status == 'a':
+                                                pro.change_status(project, t, 'ARCHIVED')
+                                            elif status == 'd':
+                                                pro.change_status(project, t, 'DOING')
+                                            elif status == 't':
+                                                pro.change_status(project, t, 'TODO')
+                                            else:
+                                                pro.change_status(project, t, 'BACKLOG')
+                                        elif option == '4':
+                                            clear_console()
+                                            
                                         else:
                                             clear_console()
                                             console.print("[bold red]invalid choice[/bold red]\n")
@@ -697,7 +734,7 @@ def main():
             
             if check_admin(nam , ramz):
                 try:    
-                    a = Prompt.ask("\nSelect an option:\n1. Managing Account\n2. Destroying Data\n")
+                    a = Prompt.ask("\nSelect an option:\n1. Managing Account\n2. Destroying Data\n3.logging\n")
                     if a == "1":
                         acc_ban = input("Enter the Account that you want:\n")
                         command = input("Enter your command:\n1. Activate\n2. Diactivate\n")
@@ -706,11 +743,18 @@ def main():
                         if command=='2':
                             manager.activate_account(acc_ban, 'deactivate')
                         else:
-                            console.print("[bold red]Invalid choice[/bold red]")
+                            console.print("[bold red]Invalid choice[/bold red]\n")
                             
                     elif a == "2":
                         manager.purge_data()
-                        
+                    elif a == '3':
+                        b=Prompt.ask("1.system_events\n2.user_events") 
+                        if b == '1':
+                            manager.logging('1')
+                        elif b == '2':
+                            manager.logging('2')
+                        else:
+                            console.print("[bold red]Invalid choice[/bold red]")
                     else:
                         print("Invalid option selected.")
                 except Exception as e:
