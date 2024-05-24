@@ -227,7 +227,7 @@ class Project:
             f.write('\n')
             add_task()
 
-    def assign_task(self, assigned_to_task, name):
+    def assigne_task(self, assigned_to_task, name):
         with open('memberstask.txt', 'a') as f:
             f.write(self.title+assigned_to_task)
             f.write(' ')
@@ -379,7 +379,6 @@ def display_user_page(user):
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
                 else:
                     while True:
-
                         table = Table(title="Your Projects")
                         table.add_column("Name", style="cyan", no_wrap=True)
                         table.add_column("Members", style="magenta")
@@ -480,17 +479,21 @@ def display_user_page(user):
                             taskkk = Prompt.ask("Enter name of a task you want to assigne") 
                             memb = Prompt.ask("Enter name of the member you want to add")
                             dicc = add_task()
+                            x=0#counter
                             for i in dic[user.username]:
                                 if i != option:
-                                    console.print(f"[bold red]No such a project named '{option}'[/bold red]\n")
+                                    pass#console.print(f"[bold red]No such a project named '{option}'[/bold red]\n")
                                 else:
+                                    x=1
                                     if not option in dicc:
                                         console.print(f"[bold red]No tasks in '{option}'[/bold red]\n")
                                     else:
+                                        z=0
                                         for j in dicc[option]:
                                             if j != taskkk:
-                                                console.print(f"[bold red]No such a task named '{taskkk}'[/bold red]\n")
+                                                pass#console.print(f"[bold red]No such a task named '{taskkk}'[/bold red]\n")
                                             else:
+                                                z=1
                                                 dicm = add_members()
                                                 if not option in dicm:
                                                    console.print(f"[bold red]No members in '{option}'[/bold red]\n") 
@@ -500,11 +503,14 @@ def display_user_page(user):
                                                     di = add_member_to_task()
                                                     if len(di)==0:
                                                         pro = return_project(option, user.username)
-                                                        pro.assign_task(taskkk, memb)
+                                                        pro.assigne_task(taskkk, memb)
                                                     else:
                                                         if not option+taskkk in di:
-                                                            console.print("[bold red]No members assigned[/bold red]")
-                                                        else:
+                                                            pro = return_project(option, user.username)
+                                                            pro.assigne_task(taskkk, memb)
+                                                            console.print(f"[bold blue]Successfully member {memb} assigned to '{taskkk}'")
+                                                             #console.print("[bold red]No members assigned[/bold red]")
+                                                        else:#not sure if goes to this
                                                             a=0 #couter for adding
                                                             for z in di[option+taskkk]:
                                                                 if z == memb and a==0:
@@ -512,10 +518,15 @@ def display_user_page(user):
                                                                     a=1
                                                             if a==0:
                                                                 pro = return_project(option, user.username)
-                                                                pro.assign_task(taskkk, memb)
-                                                            
+                                                                pro.assigne_task(taskkk, memb)
+                                                                console.print(f"[bold blue]Successfully member {memb} assigned to '{taskkk}'")
                                                                 #pro.assign_task(taskkk, memb)#refresh??
-                                
+                                        
+                                        if z==0:
+                                            console.print(f"[bold red]No such a task named '{taskkk}'[/bold red]\n")
+                            if x==0:
+                                console.print(f"[bold red]No such a project named '{option}'[/bold red]\n")
+                                    
                         elif ch == '5':
                             clear_console()
                             break
@@ -633,3 +644,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
