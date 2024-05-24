@@ -72,10 +72,19 @@ def purge_data():
     if confirmation.lower() == "yes":
         # Open the file in write mode to clear its contents
         with open("manba.txt", "w") as f:
-            pass  # Writing an empty string effectively clears the file
-        print("All data has been purged successfully.")
+            pass  
+        
         with open("projects.txt" ,"w") as fi:
             pass
+        with open("members.json" ,"w") as p:
+            pass
+        with open ("members.txt" , "w") as d:
+            pass
+        with open ("tasks.json" , "w") as g:
+            pass
+        
+        print("All data has been purged successfully.")
+         
     else:
         print("Operation cancelled.")
 
