@@ -1,4 +1,4 @@
-'''
+
 import unittest
 from manager import activate_account, purge_data
 import main
@@ -10,7 +10,8 @@ from manager import create_admin
 from unittest.mock import patch
 
 from manager import purge_data
-'''
+from main import log_system_event ,log_file_operation , log_user_action_del
+from main import add_project
 '''
 class TestActivateAccountFunction(unittest.TestCase):
     def setUp(self):
@@ -117,18 +118,6 @@ class TestDateTimeFunctions(unittest.TestCase):
         self.assertEqual(time(), datetime.now().time())
 
 
-
-
-
-'''
-import unittest
-from unittest.mock import patch
-from io import StringIO
-import os
-from datetime import datetime
-
-
-from main import log_system_event ,log_file_operation , log_user_action_del
 class TestLoggingFunctions(unittest.TestCase):
 
     def setUp(self):
@@ -161,6 +150,54 @@ class TestLoggingFunctions(unittest.TestCase):
         self.assertTrue(os.path.exists('system_events.log'))
         self.assertIn("System event: project :new_project", mock_stdout.getvalue())
 
+
+class TestAddProject(unittest.TestCase):
+    
+    def setUp(self):
+        # Create a temporary file for testing
+        self.test_file = 'test_projects.txt'
+        with open(self.test_file, 'w') as f:
+            f.write('user1 project1\n')
+            f.write('user2 project2\n')
+        
+    def tearDown(self):
+        # Close the file and then remove it after testing
+        with open(self.test_file, 'rb') as f:
+            f.close()
+        os.remove(self.test_file)
+        
+    def test_add_project_to_empty_file(self):
+        # Test adding a project to an empty file
+        projects_by_user = {}
+        expected_result = {'user1': ['project1']}
+        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
+            result = add_project()
+        self.assertEqual(result, expected_result)
+        
+    def test_add_project_to_nonempty_file(self):
+        # Test adding a project to a non-empty file
+        projects_by_user = {'user1': ['project1']}
+        expected_result = {'user1': ['project1', 'project3']}
+        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
+            result = add_project()
+        self.assertEqual(result, expected_result)
+        
+    def test_handle_exception(self):
+        # Test handling exceptions
+        with patch('builtins.open', side_effect=Exception('Test exception')):
+            with self.assertLogs() as cm:
+                add_project()
+                self.assertIn('Error in add_project function:', cm.output[0])
+                
+    def test_add_existing_project(self):
+        # Test adding an existing project
+        projects_by_user = {'user1': ['project1']}
+        expected_result = {'user1': ['project1']}
+        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
+            result = add_project()
+        self.assertEqual(result, expected_result)
+        
+'''
 
 if __name__ == '__main__':
     unittest.main()

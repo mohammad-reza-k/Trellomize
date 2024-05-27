@@ -64,3 +64,108 @@ Traceback (most recent call last):
     log_system_event(f"member '{member_name}' Added successfully")
                                 ^^^^^^^^^^^
 UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-26 14:01:28,983 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 14:01:28,990 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 14:01:28,994 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 14:03:40,927 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 14:03:40,934 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 14:03:40,938 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 14:12:20,719 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 14:12:20,724 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 14:12:20,728 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 68, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-26 15:55:27,688 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 246, in add_members
+    log_system_event(f"member '{member_name}' Added successfully")
+                                ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-27 15:00:27,388 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 329, in add_members
+    log_system_event(f"member '{member_name}' Added successfully")
+                                ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-27 15:02:40,921 - ERROR - Error adding task: cannot access local variable 'task_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 158, in add_task
+    log_system_event(task_name)
+                     ^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_name' where it is not associated with a value
+2024-05-27 15:02:53,108 - ERROR - Error adding task: cannot access local variable 'task_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 158, in add_task
+    log_system_event(task_name)
+                     ^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_name' where it is not associated with a value
+2024-05-27 15:03:13,094 - ERROR - Error adding task: cannot access local variable 'task_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 158, in add_task
+    log_system_event(task_name)
+                     ^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_name' where it is not associated with a value
+2024-05-27 15:07:13,568 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 370, in add_member_to_task
+    log_system_event(f"member  '{member_name}' Added to task successfully")
+                                 ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-27 15:08:01,132 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 370, in add_member_to_task
+    log_system_event(f"member  '{member_name}' Added to task successfully")
+                                 ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-27 15:08:38,984 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 370, in add_member_to_task
+    log_system_event(f"member  '{member_name}' Added to task successfully")
+                                 ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-27 15:09:23,447 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 370, in add_member_to_task
+    log_system_event(f"member  '{member_name}' Added to task successfully")
+                                 ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-27 15:14:19,096 - ERROR - Error adding task: cannot access local variable 'member_name' where it is not associated with a value
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 370, in add_member_to_task
+    log_system_event(f"member  '{member_name}' Added to task successfully")
+                                 ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
