@@ -1,5 +1,6 @@
 import argparse
 import os
+from rich.console import Console
 
 def create_admin(username, password):
     # Check if adminfile already exists
@@ -55,29 +56,18 @@ def activate_account(user, command):
         print(f"Account for {user} has been deactivated.")
 
 def purge_data():
-    confirmation = input("Are you sure you want to purge all data? (yes/no): ")
-    if confirmation.lower() == "yes":
+        console = Console()
         # Open the file in write mode to clear its contents
         files_to_purge = [
             "tasks.json", "projects.json", "members.json", "memberstask.json", 
             "descriptionstask.json", "projects.txt", "tasks.txt", "members.txt", 
-            "memberstask.json", "time.txt", "task_detail.txt", "manba.txt"
+            "memberstask.txt", "time.txt", "task_details.txt", "manba.txt", "time.json", "prio.json"
+            
         ]
         for filename in files_to_purge:
             with open(filename, "w") as file:
                 pass
-        print("All data has been purged successfully.")
-    else:
-        print("Operation cancelled.")
-def logging(event):
-    if event == '1':
-        with open('user_actions.log', 'r') as f:
-            for lines in f:
-                print(lines, end='')
-    else:
-        with open('system_events.log', 'r') as f:
-            for lines in f:
-                print(lines, end='')
+        console.print("[bold yellow]All data has been purged successfully[/bold yellow]")
             
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Manage system modes")
