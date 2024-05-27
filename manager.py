@@ -57,18 +57,23 @@ def activate_account(user, command):
 
 def purge_data():
         console = Console()
-        # Open the file in write mode to clear its contents
-        files_to_purge = [
-            "tasks.json", "projects.json", "members.json", "memberstask.json", 
-            "descriptionstask.json", "projects.txt", "tasks.txt", "members.txt", 
-            "memberstask.txt", "time.txt", "task_details.txt", "manba.txt", "time.json", "prio.json", 
-            "manage.txt"
-            
-        ]
-        for filename in files_to_purge:
-            with open(filename, "w") as file:
-                pass
-        console.print("[bold yellow]All data has been purged successfully[/bold yellow]")
+        con = input("Are you sure you want to pureg all data? (yes/no)")
+        if con.lower()=='no':
+            console.print("[bold yellow]Operation canceled[/bold yellow]")
+        elif con.lower()=='yes':
+            files_to_purge = [
+                "tasks.json", "projects.json", "members.json", "memberstask.json", 
+                "descriptionstask.json", "projects.txt", "tasks.txt", "members.txt", 
+                "memberstask.txt", "time.txt", "task_details.txt", "manba.txt", "time.json", "prio.json", 
+                "manage.txt"
+                
+            ]
+            for filename in files_to_purge:
+                with open(filename, "w") as file:
+                    pass
+            console.print("[bold yellow]All data has been purged successfully[/bold yellow]")
+        else:
+            console.print("[bold red]Kerm nariz da[bold red]")
             
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Manage system modes")
