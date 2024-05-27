@@ -169,3 +169,33 @@ Traceback (most recent call last):
     log_system_event(f"member  '{member_name}' Added to task successfully")
                                  ^^^^^^^^^^^
 UnboundLocalError: cannot access local variable 'member_name' where it is not associated with a value
+2024-05-27 20:46:15,586 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 72, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-27 20:46:15,593 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 72, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-27 20:46:15,610 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 72, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-27 20:53:45,753 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 72, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-27 20:53:45,758 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 72, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol
+2024-05-27 20:53:45,763 - ERROR - Error in add_project function: 'str' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "c:\Users\admin\Documents\GitHub\Trellomize\main.py", line 72, in add_project
+    with open('projects.txt', 'r') as file:
+TypeError: 'str' object does not support the context manager protocol

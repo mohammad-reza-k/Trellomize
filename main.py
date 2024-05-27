@@ -111,24 +111,25 @@ def delete_project(user, project_name_to_delete):
         if user in projects_by_user:
             del projects_by_user[user]
         save_data(projects_by_user, projson)
-        # with open('tasks.txt', 'r') as file:
-        #     lines = file.readlines()
-        #     for line in lines:
-        #         project_name, task_name , di= line.strip().split(' ')
-        #         if project_name != project_name_to_delete:
-        #             updated.append(line)
+        updated=[]
+        with open('tasks.txt', 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                project_name, task_name , di= line.strip().split(' ')
+                if project_name != project_name_to_delete:
+                    updated.append(line)
 
-        # with open('tasks.txt', 'w') as f:
-        #     f.writelines(updated)
+        with open('tasks.txt', 'w') as f:
+            f.writelines(updated)
 
-        # with open('members.txt', 'r') as file:
-        #     lines = file.readlines()
+        with open('members.txt', 'r') as file:
+            lines = file.readlines()
 
-        # update = []
-        # for line in lines:
-        #     project_name, member_name = line.strip().split(' ')
-        #     if project_name != project_name_to_delete:
-        #         update.append(line)
+        update = []
+        for line in lines:
+            project_name, member_name = line.strip().split(' ')
+            if project_name != project_name_to_delete:
+                update.append(line)
         with open('members.txt', 'w') as file:
             file.writelines(updated_lines)
 
@@ -332,7 +333,7 @@ def add_members():
     except Exception as e :
         logging.error(f'Error adding task: {e}', exc_info=True)
 
-def delete_members(member_name_to_delete):
+def delete_members(project,member_name_to_delete):
     try:
         with open('members.txt', 'r') as file:
             lines = file.readlines()
@@ -340,19 +341,39 @@ def delete_members(member_name_to_delete):
         updated_lines = []
         for line in lines:
             project_name, member_name = line.strip().split(' ')
-            if member_name != member_name_to_delete:
+            if project == project_name and member_name != member_name_to_delete:
                 updated_lines.append(line)
 
-        with open('member.txt', 'w') as file:
+        with open('members.txt', 'w') as file:
             file.writelines(updated_lines)
 
-        if member_name_to_delete in memberdic:
-            del memberdic[member_name_to_delete]
-            
+        if member_name_to_delete in memberdic[project]:
+            for i in range(len(memberdic[project])):
+                if memberdic[project][i]==member_name_to_delete:
+                    del memberdic[project][i]
         save_data(memberdic, members)
-        log_system_event(f"member '{member_name_to_delete}' deleted successfully")
+        log_system_event(f"member '{member_name_to_delete}' deleted successfully from project {project}")
         log_user_action('System', 'Deleted member')
-        return memberdic#delete member from project
+        ##
+        updated_lines.clear()
+        with open('memberstask.txt', 'r') as file:
+            lines = file.readlines()
+
+        updated_lines = []
+        for line in lines:
+            project_task_name, member_name = line.strip().split(' ')
+            if project in project_task_name and member_name != member_name_to_delete:
+                updated_lines.append(line)
+
+        with open('memberstask.txt', 'w') as file:
+            file.writelines(updated_lines)
+
+        if member_name_to_delete in memberdic[project_task_name]:
+            for i in range(len(membertaskdic[project_task_name])):
+                if member_name_to_delete== memberdic[project_task_name][i] :
+                    del membertaskdic[project_task_name][i]
+        save_data(membertaskdic, memberstask)
+
     except Exception as e:
         logging.error(f'Error adding task: {e}', exc_info=True)
 
@@ -460,43 +481,44 @@ class User:
             f.write(f"{self.username} {title}\n") 
             f.close()
             add_project()
-  
+    
 def tedad_vorood(word, file_path):
-    with open(file_path, 'r+') as file:
-        content = file.read()
-        word_start = content.find(word)
+     with open(file_path, 'r+') as file:
+         content = file.read()
+         word_start = content.find(word)
         
-        if word_start == -1:  # Word not found
-            print(f"Word '{word}' not found in the file.")
-            return
+         if word_start == -1:  # Word not found
+             print(f"Word '{word}' not found in the file.")
+             return
         
-        number_start = word_start + len(word)  # Start index of the number
-        while number_start < len(content) and content[number_start] == ' ':
-            number_start += 1
+         number_start = word_start + len(word)  # Start index of the number
+         while number_start < len(content) and content[number_start] == ' ':
+             number_start += 1
         
-        number_end = number_start
+         number_end = number_start
 
-          # Find the end of the number
-        while number_end < len(content) and content[number_end].isdigit():
-            number_end += 1
+         # Find the end of the number
+         while number_end < len(content) and content[number_end].isdigit():
+             number_end += 1
 
-        if number_start == number_end:  # No number found after the word
-            number = 1
-            new_content = content[:number_start] + " 1" + content[number_end:]
-        else:
-            number = int(content[number_start:number_end]) + 1
-            new_content = content[:number_start] + str(number) + content[number_end:]
+         if number_start == number_end:  # No number found after the word
+             number = 1
+             new_content = content[:number_start] + " 1" + content[number_end:]
+         else:
+             number = int(content[number_start:number_end]) + 1
+             new_content = content[:number_start] + str(number) + content[number_end:]
         
-          # Move the file cursor to the beginning and write the new content
-        file.seek(0)
-        file.write(new_content)
-        file.truncate()#admin
-               
+         # Move the file cursor to the beginning and write the new content
+         file.seek(0)
+         file.write(new_content)
+         file.truncate()#admin
+
+    
 def create_acc():
     console = Console()
     email = Prompt.ask("Enter your email:")
     if login(email)==1:
-        console.print("[bold blue]this account already exist[/bold blue]\n")
+        console.print("[bold blue]this account or user already exist[/bold blue]\n")
         return
     username = Prompt.ask("Enter your username:")
     password = Prompt.ask("Enter your password:", password=True)
@@ -586,7 +608,7 @@ def display_user_page(user):
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
                 else:
                     while True:
-                        clear_console()
+                        #clear_console()
                         table = Table(title="Your Projects")
                         table.add_column("Name", style="cyan", no_wrap=True)
                         table.add_column("Members", style="magenta")
@@ -612,7 +634,7 @@ def display_user_page(user):
                                         #clear_console()
                                         di = add_member_to_task()
                                         sta = add_status()
-                                        print(sta)
+                                        # print(sta)
                                         tim = add_time()
 
                                         pro = return_project(project, user.username)
@@ -670,7 +692,7 @@ def display_user_page(user):
                                                 if i==project:
                                                     if taskk in dicc[i]:
                                                         dicc[project].remove(taskk)
-                                                        delete_task(taskk)
+                                                        delete_task(i,taskk)
                                                     else:
                                                         console.print("[bold yellow]No such a task in your project[/bold yellow]\n") 
                                             
@@ -703,6 +725,8 @@ def display_user_page(user):
                                                     for d in range(len(coment[project+tas])):
                                                         ta.add_row(f'{d+1}',f'{coment[project+tas][d]}')#comment show
                                                     console.print(ta)
+                                                else:
+                                                    console.print("[bold yellow]No comment for this task\n")
                                             else:
                                                 console.print("[bold yellow]No such a task[/bold yellow]")
                                             s = Prompt.ask("press any key to go back")
@@ -749,7 +773,7 @@ def display_user_page(user):
                                                 if i==project:
                                                     if taskk in dicc[i]:
                                                         dicc[project].remove(taskk)
-                                                        delete_task(taskk)
+                                                        delete_task(i,taskk)
                                                     else:
                                                         console.print("[bold yellow]No such a task in your project[/bold yellow]\n") 
 
@@ -821,40 +845,58 @@ def display_user_page(user):
                             break
                         elif ch =='4':
                             clear_console()
-                            
-                            project = Prompt.ask("the name of the project")
-                            if project in dic[user.username]:
-                                d = add_members()
-                                member = Prompt.ask("Enter username or a email of the one you want to add to your project:")
-                                pro = return_project(project, user.username)
-                                a=0 #counter for adding member onc
-                                with open('manba.txt', 'r') as file:                                
-                                    for line in file:
-                                        email, nam,ram, t=line.strip().split(' ') 
-                                        if d is None==0:
-                                            if (member==email or member==nam) and a==0:
-                                                pro.add_member(member)
-                                                pro.add_member(member)#refresh
-                                                console.print('[bold green]Member added successfully![/bold green]')
-                                                a=1
+                            n = Prompt.ask("'1' for add '2' for delete member")
+                            if n =='1':
+                                project = Prompt.ask("the name of the project")
+                                if project in dic[user.username]:
+                                        d = add_members()
+                                        member = Prompt.ask("Enter username or a email of the one you want to add to your project:")
+                                        pro = return_project(project, user.username)
+                                        a=0 #counter for adding member onc
+                                        with open('manba.txt', 'r') as file:                                
+                                            for line in file:
+                                                email, nam,ram, t=line.strip().split(' ') 
+                                                if d is None==0:
+                                                    if (member==email or member==nam) and a==0:
+                                                        pro.add_member(member)
+                                                        pro.add_member(member)#refresh
+                                                        console.print('[bold green]Member added successfully![/bold green]')
+                                                        a=1
 
+                                                else:
+                                                    if not d is None and project in d and member in d[project]:
+                                                        a=2
+                                                    elif (member==email or member==nam) and a==0:
+                                                        pro.add_member(member)
+                                                        pro.add_member(member)#refresh
+                                                        console.print('[bold green]Member added successfully![/bold green]')
+                                                        a=1
+                                                        break
+
+                                            if a==0:
+                                                console.print(f"[bold red]No user account named '{member}' found[/bold red]")      
+                                            if a==2:
+                                                console.print(f"[bold yellow]user '{member}' is already in the project[/bold yellow]")
+                                        
+                                else:
+                                    console.print("[bold red]No such a project[/bold red]\n")#return??
+                            elif n =='2':
+                                project = Prompt.ask("the name of the project")
+                                if project in dic[user.username]:
+                                        d = add_members()
+                                        member = Prompt.ask("Enter username or a email of the one you want to delete from your project:")
+                                        # pro = return_project(project, user.username)
+                                        if project in d and member in d[project] and member!=user.username:
+                                            delete_members(project, member)
+                                        elif project in d and member in d[project] and member==user.username:
+                                           console.print("[bold red]you can't delete yourself[/bold red]\n")   
                                         else:
-                                            if not d is None and project in d and member in d[project]:
-                                                a=2
-                                            elif (member==email or member==nam) and a==0:
-                                                pro.add_member(member)
-                                                pro.add_member(member)#refresh
-                                                console.print('[bold green]Member added successfully![/bold green]')
-                                                a=1
-                                                break
-
-                                    if a==0:
-                                        console.print(f"[bold red]No user account named '{member}' found[/bold red]")      
-                                    if a==2:
-                                        console.print(f"[bold yellow]user '{member}' is already in the project[/bold yellow]")
-                                
+                                            console.print(f"[bold red]No such a member named {member} in project {project}[/bold red]\n") 
+                                else:
+                                    console.print("[bold red]No such a project[/bold red]\n")#return??
                             else:
-                                console.print("[bold red]No such a project[/bold red]\n")#return??
+                                console.print("[bold red]Invalid coice[/bold red]")
+                                
                         elif ch == '1':
                             clear_console()
                             proro = Prompt.ask("Name of the project you want to delete:")
@@ -993,7 +1035,8 @@ def display_user_page(user):
                                                         for d in range(len(coment[pr+tak])):
                                                             ta.add_row(f'{d+1}',f'{coment[pr+tak][d]}')#comment show
                                                         console.print(ta)
-
+                                                    else:
+                                                        console.print("[bold yellow]No comment for this task\n")
                                             elif pr+tak in dicmem and user.username not in dicmem[pr+tak]:
                                                 console.print("You are not assigned to this task")
                                             else:
@@ -1008,7 +1051,8 @@ def display_user_page(user):
                                                         for d in range(len(coment[pr+tak])):
                                                             ta.add_row(f'{d+1}',f'{coment[pr+tak][d]}')#comment show
                                                         console.print(ta)
-        
+                                                    else:
+                                                        console.print("[bold yellow]No comment for this task\n")
                                         else:
                                             console.print(f"[bold red]No such a task named {tak} in {pr}[/bold red]")
 
@@ -1058,8 +1102,7 @@ def main():
         elif choice == "2" :
             clear_console()
             nam= Prompt.ask("enter your email or username\n")
-            ramz = Prompt.ask("Enter Your Pass:\n")
-            tedad_vorood(nam ,"manage.txt")
+            ramz = Prompt.ask("Enter Your Pass:\n", password=True)
             if check_admin(nam , ramz):
                 try:    
                     a = Prompt.ask("\nSelect an option:\n1. Managing Account\n2. Destroying Data\n3.logging\n")
@@ -1074,7 +1117,7 @@ def main():
                             console.print("[bold red]Invalid choice[/bold red]\n")
                             
                     elif a == "2":
-                        confirmation = Prompt.ask("Are you sure you want to purge all data? (yes/no): ")
+                        confirmation = Prompt.ask("Are you realy sure (yes/no)")
                         if confirmation == "yes":
                             manager.purge_data()
                             log_system_event("purged data")
@@ -1094,6 +1137,7 @@ def main():
                     print("An error occurred:", e)
 
             elif check_pass(nam, hashh(ramz)):
+                tedad_vorood(nam, 'manage.txt')
                 console.print("[bold green]log in sucsusfully![/bold green]")
                 user = login_acc(nam, ramz)#return user type
                 display_user_page(user) 

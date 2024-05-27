@@ -13,6 +13,87 @@ from manager import purge_data
 from main import log_system_event ,log_file_operation , log_user_action_del
 from main import add_project
 '''
+
+class TestLoggingFunctions(unittest.TestCase):
+
+    def setUp(self):
+        # Remove log files before each test
+        for filename in ['user_actions.log', 'system_events.log']:
+            if os.path.exists(filename):
+                os.remove(filename)
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_log_file_operation(self, mock_stdout):
+        log_file_operation('read', 'test_file.txt')
+        self.assertTrue(os.path.exists('test_file.txt'))
+        self.assertIn('read operation performed on file: test_file.txt', mock_stdout.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_log_user_action(self, mock_stdout):
+        log_user_action('user1', 'login')
+        self.assertTrue(os.path.exists('user_actions.log'))
+        self.assertIn("User 'user1' performed action: login", mock_stdout.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_log_user_action_del(self, mock_stdout):
+        log_user_action_del('user1', 'task1')
+        self.assertTrue(os.path.exists('user_actions.log'))
+        self.assertIn("User 'user1' performed action: Deleted task1", mock_stdout.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_log_system_event(self, mock_stdout):
+        log_system_event('new_project')
+        self.assertTrue(os.path.exists('system_events.log'))
+        self.assertIn("System event: project :new_project", mock_stdout.getvalue())
+
+
+class TestAddProject(unittest.TestCase):
+    
+    def setUp(self):
+        # Create a temporary file for testing
+        self.test_file = 'test_projects.txt'
+        with open(self.test_file, 'w') as f:
+            f.write('user1 project1\n')
+            f.write('user2 project2\n')
+        
+    def tearDown(self):
+        # Close the file and then remove it after testing
+        with open(self.test_file, 'rb') as f:
+            f.close()
+        os.remove(self.test_file)
+        
+    def test_add_project_to_empty_file(self):
+        # Test adding a project to an empty file
+        projects_by_user = {}
+        expected_result = {'user1': ['project1']}
+        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
+            result = add_project()
+        self.assertEqual(result, expected_result)
+        
+    def test_add_project_to_nonempty_file(self):
+        # Test adding a project to a non-empty file
+        projects_by_user = {'user1': ['project1']}
+        expected_result = {'user1': ['project1', 'project3']}
+        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
+            result = add_project()
+        self.assertEqual(result, expected_result)
+        
+    def test_handle_exception(self):
+        # Test handling exceptions
+        with patch('builtins.open', side_effect=Exception('Test exception')):
+            with self.assertLogs() as cm:
+                add_project()
+                self.assertIn('Error in add_project function:', cm.output[0])
+                
+    def test_add_existing_project(self):
+        # Test adding an existing project
+        projects_by_user = {'user1': ['project1']}
+        expected_result = {'user1': ['project1']}
+        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
+            result = add_project()
+        self.assertEqual(result, expected_result)
+        
+'''
 class TestActivateAccountFunction(unittest.TestCase):
     def setUp(self):
         # Create a test file with initial user data
@@ -117,87 +198,6 @@ class TestDateTimeFunctions(unittest.TestCase):
     def test_time(self):
         self.assertEqual(time(), datetime.now().time())
 
-
-class TestLoggingFunctions(unittest.TestCase):
-
-    def setUp(self):
-        # Remove log files before each test
-        for filename in ['user_actions.log', 'system_events.log']:
-            if os.path.exists(filename):
-                os.remove(filename)
-
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_log_file_operation(self, mock_stdout):
-        log_file_operation('read', 'test_file.txt')
-        self.assertTrue(os.path.exists('test_file.txt'))
-        self.assertIn('read operation performed on file: test_file.txt', mock_stdout.getvalue())
-
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_log_user_action(self, mock_stdout):
-        log_user_action('user1', 'login')
-        self.assertTrue(os.path.exists('user_actions.log'))
-        self.assertIn("User 'user1' performed action: login", mock_stdout.getvalue())
-
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_log_user_action_del(self, mock_stdout):
-        log_user_action_del('user1', 'task1')
-        self.assertTrue(os.path.exists('user_actions.log'))
-        self.assertIn("User 'user1' performed action: Deleted task1", mock_stdout.getvalue())
-
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_log_system_event(self, mock_stdout):
-        log_system_event('new_project')
-        self.assertTrue(os.path.exists('system_events.log'))
-        self.assertIn("System event: project :new_project", mock_stdout.getvalue())
-
-
-class TestAddProject(unittest.TestCase):
-    
-    def setUp(self):
-        # Create a temporary file for testing
-        self.test_file = 'test_projects.txt'
-        with open(self.test_file, 'w') as f:
-            f.write('user1 project1\n')
-            f.write('user2 project2\n')
-        
-    def tearDown(self):
-        # Close the file and then remove it after testing
-        with open(self.test_file, 'rb') as f:
-            f.close()
-        os.remove(self.test_file)
-        
-    def test_add_project_to_empty_file(self):
-        # Test adding a project to an empty file
-        projects_by_user = {}
-        expected_result = {'user1': ['project1']}
-        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
-            result = add_project()
-        self.assertEqual(result, expected_result)
-        
-    def test_add_project_to_nonempty_file(self):
-        # Test adding a project to a non-empty file
-        projects_by_user = {'user1': ['project1']}
-        expected_result = {'user1': ['project1', 'project3']}
-        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
-            result = add_project()
-        self.assertEqual(result, expected_result)
-        
-    def test_handle_exception(self):
-        # Test handling exceptions
-        with patch('builtins.open', side_effect=Exception('Test exception')):
-            with self.assertLogs() as cm:
-                add_project()
-                self.assertIn('Error in add_project function:', cm.output[0])
-                
-    def test_add_existing_project(self):
-        # Test adding an existing project
-        projects_by_user = {'user1': ['project1']}
-        expected_result = {'user1': ['project1']}
-        with patch('builtins.open', side_effect=open(self.test_file, 'r')):
-            result = add_project()
-        self.assertEqual(result, expected_result)
-        
-'''
 
 if __name__ == '__main__':
     unittest.main()
