@@ -29,6 +29,7 @@ des = {}
 prio={}
 timee = {}
 comment = {}
+
 def today_date():
     return datetime.today().date()
 
@@ -293,27 +294,26 @@ def add_comment(project, task ,user):
     dic = add_member_to_task()
     dicc = add_members()
     dicta = add_task()
+    comment=return_comment()
     if dicc is None or user not in dicc[project]:
         co.print(f"[bold yellow]you are not a member in project '{project}'[/bold yellow]")
-    elif dic is None and user in dicc[project]:
-        co.print(f"[bold yellow]you are not assigned to task '{task}'[/bold yellow]")
-    elif task in dicta:
-        if project+task not in dic:
-            co.print(f"[bold yellow]No assignment for task '{task}'[/bold yellow]")
-        elif user not in dic[project+task]:
-            co.print(f"[bold yellow]you are not assigned to task '{task}'[/bold yellow]")
-    elif task not in dicta:
-        co.print(f"[bold yellow]no such a task named '{task}' in project '{project}'[/bold yellow]")
-    else:#user in
+    if dicta is None or task not in dicta[project]:
+        co.print(f"[bold yellow]No task named {task} in project '{project}'[/bold yellow]")
+    elif (dic is None or project+task not in dic) and user in dicc[project]:
+        co.print(f"[bold yellow]No assigment in project '{project}'[/bold yellow]")
+    elif project+task in dic and user not in dic[project+task]:
+            co.print(f"[bold yellow]You are not assigned to task '{task}'[/bold yellow]")
+    elif project+task in dic and user in dic[project+task]:
         commen = Prompt.ask("type your comment\n")
         comment.setdefault(project+task, []).append(f"{commen}: by member '{user}'")
-    save_data(commen, "comment.json")
+        co.print("[bold blue]Comment addes successfully[bold blue]")
+        save_data(comment, "comment.json")
     return comment
     
 def return_comment():
-    save_data(comment, "comment.json")
-    return comment
-
+    with open('comment.json') as json_file:
+        data = json.load(json_file)
+    return data
     
 def add_members():
     try:
@@ -555,7 +555,7 @@ def display_user_page(user):
                     console.print("[bold yellow]You have no projects yet.[/bold yellow]")
                 else:
                     while True:
-
+                        clear_console()
                         table = Table(title="Your Projects")
                         table.add_column("Name", style="cyan", no_wrap=True)
                         table.add_column("Members", style="magenta")
@@ -662,7 +662,6 @@ def display_user_page(user):
                                             clear_console()
                                             tas= Prompt.ask("which task you want to see\n")
                                             coment = return_comment()
-                                            print(coment)
                                             if tas in dicc[project]:
                                                 if coment is None or len(coment)==0:
                                                     console.print("[bold yellow]No comment for this task\n")
@@ -846,28 +845,37 @@ def display_user_page(user):
                     dicpro = add_members()
                     dictas = add_task()
                     dicmem = add_member_to_task()
-                    print(dicpro,dictas,dicmem)
+                    pp = add_project()
+                    # print(dicpro,dictas,dicmem)
                     t = Table(title="Your projects")
                     t.add_column("Name", style="cyan", no_wrap=True)
                     t.add_column("Tasks", style="magenta")
                     if not dicpro is None:
                         for i in dicpro:
                             if user.username in dicpro[i]:
-                                for j in range(len(dictas[i])):
-                                    if len(dictas[i])==0: 
-                                        t.add_row(i, "No tasks")
-                                    elif i+dictas[i][j] in dicmem and len(dicmem[i+dictas[i][j]])==0:
-                                        t.add_row(i,f"No task assigned all:{dictas[i][j]}")
-                                    elif i+dictas[i][j] in dicmem and user.username in dicmem[i+dictas[i][j]]:
-                                        t.add_row(i, f"Assigned to :{dictas[i][j]}")
-                            
+                                if not dictas is None and i in dictas:
+                                    for j in range(len(dictas[i])):
+                                        if i+dictas[i][j] in dicmem and user.username in dicmem[i+dictas[i][j]]:
+                                            if user.username in pp and i in pp[user.username]:
+                                                t.add_row(f"{i} (owner)", f"Assigned to :{dictas[i][j]}")
+                                            else:
+                                                t.add_row(f"{i} (member)", f"Assigned to :{dictas[i][j]}")
+                                        else:
+                                            if user.username in pp and i in pp[user.username]:
+                                                t.add_row(f"{i} (owner)",f"You are not assigned to task : {dictas[i][j]}")
+                                            else:
+                                                t.add_row(f"{i} (member)",f"You are not assigned to task : {dictas[i][j]}")
+                                else:
+                                    t.add_row(i, "No tasks")
+
                         console.print(t)
-                        ch = Prompt.ask("1.View comments\n2.View task details\n3.Go back")
+                        ch = Prompt.ask("1.Add comments\n2.View comments\n3.View task details\n4.Go back")
                         if ch == '1':
                             pr = Prompt.ask("Name of the project")
                             tak = Prompt.ask("Name of the task")
+                            add_comment(pr, tak, user.username)
                             
-                        elif ch == '2':
+                        elif ch == '3':
                             clear_console()
                             pr = Prompt.ask("Name of the project")
                             tak = Prompt.ask("Name of the task")
@@ -929,13 +937,63 @@ def display_user_page(user):
                             else:
                                 console.print(f"[bold red]No such a project named {pr}[/bold red]")
 
-                        elif ch == '3':
+                        elif ch == '4':
                             break
+                        elif ch == '2':
+                            pr = Prompt.ask("Name of the project")
+                            tak = Prompt.ask("Name of the task")
+                            if pr in dicpro:
+                                if user.username in dicpro[pr]:
+                                    if dictas is None or pr not in dictas:
+                                        console.print(f"[bold red]No taks yet for {pr}[/bold red]")
+                                    else:
+                                        if tak in dictas[pr]:
+                                            if dicmem is None or pr+tak not in dicmem:
+
+                                                console.print("No assignments")
+                                                coment = return_comment()
+                                                if tak in dictas[pr]:
+                                                    if coment is None or len(coment)==0:
+                                                        console.print("[bold yellow]No comment for this task\n")
+                                                    elif pr+tak in coment:
+                                                        ta = Table(title=f"{tak}")
+                                                        ta.add_column("Name", style="cyan", no_wrap=True)
+                                                        ta.add_column("Comments", style="magenta")
+                                                        for d in range(len(coment[pr+tak])):
+                                                            ta.add_row(f'{d+1}',f'{coment[pr+tak][d]}')#comment show
+                                                        console.print(ta)
+
+                                            elif pr+tak in dicmem and user.username not in dicmem[pr+tak]:
+                                                console.print("You are not assigned to this task")
+                                            else:
+                                                coment = return_comment()
+                                                if tak in dictas[pr]:
+                                                    if coment is None or len(coment)==0:
+                                                        console.print("[bold yellow]No comment for this task\n")
+                                                    elif pr+tak in coment:
+                                                        ta = Table(title=f"{tak}")
+                                                        ta.add_column("Name", style="cyan", no_wrap=True)
+                                                        ta.add_column("Comments", style="magenta")
+                                                        for d in range(len(coment[pr+tak])):
+                                                            ta.add_row(f'{d+1}',f'{coment[pr+tak][d]}')#comment show
+                                                        console.print(ta)
+        
+                                        else:
+                                            console.print(f"[bold red]No such a task named {tak} in {pr}[/bold red]")
+
+                                else:
+                                    console.print(f"[bold red]You are not in project '{pr}'[/bold red]")
+    
+                            else:
+                                console.print(f"[bold red]No such a project named {pr}[/bold red]")
+
+
                         else:
                             console.print("[bold red]Invalid choice. Please select a valid option.[/bold red]")
                             
                     else:
                         console.print("[bold red]No members in projects yet[/bold red]")
+                        break
                     f = Prompt.ask("Press any key to continue")
                     if True:
                         pass
@@ -959,6 +1017,7 @@ def main():
     console = Console()
     x = 0
     while True:
+        
         choice = Prompt.ask("\nSelect an option:\n1. Create Account\n2. Login\n3. Exit\n")
         if choice == "1":
             clear_console()
@@ -1004,8 +1063,8 @@ def main():
                     print("An error occurred:", e)
 
             elif check_pass(nam, hashh(ramz)):
-                console.print("[bold green]log in sucsusfully![/bold green]\n")
-                user = login_acc(nam, ramz)
+                console.print("[bold green]log in sucsusfully![/bold green]")
+                user = login_acc(nam, ramz)#return user type
                 display_user_page(user) 
                 
             elif not check_pass(nam, ramz):
