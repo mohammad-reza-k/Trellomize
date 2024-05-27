@@ -61,7 +61,8 @@ def purge_data():
         files_to_purge = [
             "tasks.json", "projects.json", "members.json", "memberstask.json", 
             "descriptionstask.json", "projects.txt", "tasks.txt", "members.txt", 
-            "memberstask.txt", "time.txt", "task_details.txt", "manba.txt", "time.json", "prio.json"
+            "memberstask.txt", "time.txt", "task_details.txt", "manba.txt", "time.json", "prio.json", 
+            "manage.txt"
             
         ]
         for filename in files_to_purge:

@@ -460,12 +460,44 @@ class User:
             f.write(f"{self.username} {title}\n") 
             f.close()
             add_project()
+    
+def tedad_vorood(word, file_path):
+     with open(file_path, 'r+') as file:
+         content = file.read()
+         word_start = content.find(word)
         
+         if word_start == -1:  # Word not found
+             print(f"Word '{word}' not found in the file.")
+             return
+        
+         number_start = word_start + len(word)  # Start index of the number
+         while number_start < len(content) and content[number_start] == ' ':
+             number_start += 1
+        
+         number_end = number_start
+
+         # Find the end of the number
+         while number_end < len(content) and content[number_end].isdigit():
+             number_end += 1
+
+         if number_start == number_end:  # No number found after the word
+             number = 1
+             new_content = content[:number_start] + " 1" + content[number_end:]
+         else:
+             number = int(content[number_start:number_end]) + 1
+             new_content = content[:number_start] + str(number) + content[number_end:]
+        
+         # Move the file cursor to the beginning and write the new content
+         file.seek(0)
+         file.write(new_content)
+         file.truncate()#admin
+
+    
 def create_acc():
     console = Console()
     email = Prompt.ask("Enter your email:")
     if login(email)==1:
-        console.print("[bold blue]this account already exist[/bold blue]\n")
+        console.print("[bold blue]this account or user already exist[/bold blue]\n")
         return
     username = Prompt.ask("Enter your username:")
     password = Prompt.ask("Enter your password:", password=True)
@@ -1027,8 +1059,8 @@ def main():
         elif choice == "2" :
             clear_console()
             nam= Prompt.ask("enter your email or username\n")
-            ramz = Prompt.ask("Enter Your Pass:\n")
-            
+            ramz = Prompt.ask("Enter Your Pass:\n", password=True)
+            tedad_vorood(nam, 'manage.txt')
             if check_admin(nam , ramz):
                 try:    
                     a = Prompt.ask("\nSelect an option:\n1. Managing Account\n2. Destroying Data\n3.logging\n")
