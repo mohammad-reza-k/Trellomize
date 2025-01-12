@@ -45,11 +45,10 @@ def log_file_operation(operation, file_path):
 
 def log_user_action(user, action):
     try:
-        with open('user_actions.log', 'a') as log_file:
-            log_file.write(f"User '{user}' performed action: {action} in {time()} in {today_date()} \n")
+        with open("log_useraction.log" ,"a") as file:
+            file.write("fghjk")
     except Exception as e:
-        logging.error(f'Error logging user action: {e}', exc_info=True)
-        
+        logging.error("dfgh")
 def log_user_action_del(user, action):
     try:
         with open('user_actions.log', 'a') as log_file:
@@ -184,7 +183,7 @@ def add_status():
                 project_name, task_name, priority, status = line.strip().split(' ')  
                 if task_name in prio and len(prio[task_name])==0:
                     if priority not in prio[task_name] and status not in prio[task_name]:
-                        prio[task_name].append(priority)
+                prio[task_name].append(priority)
                         prio[task_name].append(status)
                 else:
                     prio[task_name] = [priority,status]

@@ -24,14 +24,12 @@ def activate_account(user, command):
             lines = file.readlines()
             new_lines = []
             for line in lines:
-                elements = line.split()
-                if len(elements) >= 4:
-                    if elements[1] == user or elements[0] == user:
-                        elements[3] = 'T'  # Replace 'new_value' with the desired value
-                        new_line = ' '.join(elements)
-                        new_lines.append(new_line)
-                    else:
-                        new_lines.append(line)
+                elements=line.split()
+                if elements[1]==user or elements[0]==user:
+                    elements[3]='T'
+                    new_lines=' '.join(elements)
+                    elements.append(new_lines)
+                    
         with open('manba.txt', 'w') as file:
             for line in new_lines:
                 file.write(f"{line}\n")
