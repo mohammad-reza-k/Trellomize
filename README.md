@@ -1,2 +1,2 @@
 # Trellomize
-A simple terminal app like Terrelo.
+A simple terminal app like Trello.
